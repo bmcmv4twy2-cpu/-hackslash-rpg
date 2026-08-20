@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>灰燼のクロニクル</title>
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:linear-gradient(160deg,#15151d,#26202a 55%,#11131a);color:#eee;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+#app{max-width:760px;margin:auto;padding:12px 10px 40px}
+h1{margin:4px 0;font-size:25px}.sub{color:#aaa;font-size:12px}
+.card{background:#1d1d27;border:1px solid #383845;border-radius:16px;padding:12px;margin:9px 0;box-shadow:0 8px 24px #0004}
+button{width:100%;border:0;border-radius:11px;padding:12px;margin:4px 0;background:#6956c9;color:#fff;font-weight:700;font-size:14px}
+button:disabled{opacity:.35}button.red{background:#8b3e4b}button.green{background:#38765a}button.gold{background:#896b2c}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:7px}.row3{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.stat{background:#11131b;border-radius:10px;padding:8px;text-align:center}.stat small{display:block;color:#999}.stat b{font-size:17px}
+.bar{height:11px;background:#0b0c11;border-radius:8px;overflow:hidden;margin:4px 0 8px}.fill{height:100%}.hp{background:#d64f5c}.mp{background:#5379d8}.xp{background:#8d59c7}
+.tabs{position:sticky;top:0;z-index:5;background:#15151d;padding:5px 0;display:grid;grid-template-columns:repeat(3,1fr);gap:5px}.tabs button{font-size:12px;padding:9px}
+.item{background:#11131b;border-radius:11px;padding:9px;margin:6px 0}.itemhead{display:flex;justify-content:space-between;gap:8px}.common{color:#ddd}.magic{color:#63a7ff}.rare{color:#f1c94c}.epic{color:#d878ff}.legendary{color:#ff8b49}.mythic{color:#ff58a8}
+.small{font-size:11px;color:#aaa}.log{max-height:170px;overflow:auto;font-size:12px}.log div{border-bottom:1px solid #292a35;padding:3px 0}
+.big{text-align:center;font-size:48px}.center{text-align:center}.locked{opacity:.45}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+const KEY="haijin_chronicle_v1";
+const R=[
+{id:"common",n:"コモン",m:1,c:55},{id:"magic",n:"マジック",m:1.25,c:25},
+{id:"rare",n:"レア",m:1.6,c:12},{id:"epic",n:"エピック",m:2.1,c:6},
+{id:"legendary",n:"レジェンダリー",m:3.0,c:1.7},{id:"mythic",n:"ミシック",m:4.2,c:.3}];
+const JOBS={
+"戦士":{lv:1,hp:140,mp:35,atk:14,def:9,crit:5,skills:["強打"]},
+"魔法使い":{lv:1,hp:85,mp:100,atk:18,def:3,crit:8,skills:["火球"]},
+"盗賊":{lv:1,hp:105,mp:55,atk:13,def:5,crit:18,skills:["二連撃"]},
+"僧侶":{lv:1,hp:115,mp:80,atk:10,def:7,crit:5,skills:["癒し"]},
+"弓使い":{lv:1,hp:100,mp:55,atk:15,def:4,crit:14,skills:["狙撃"]},
+"商人":{lv:1,hp:110,mp:50,atk:10,def:5,crit:7,skills:["強欲"]},
+"騎士":{req:5,from:["戦士"],hp:170,mp:45,atk:18,def:13,crit:6,skills:["盾撃"]},
+"バーサーカー":{req:5,from:["戦士"],hp:155,mp:35,atk:25,def:5,crit:10,skills:["狂撃"]},
+"賢者":{req:5,from:["魔法使い","僧侶"],hp:100,mp:130,atk:24,def:5,crit:10,skills:["雷撃"]},
+"大魔導士":{req:10,from:["魔法使い","賢者"],hp:105,mp:170,atk:31,def:5,crit:12,skills:["隕石"]},
+"アサシン":{req:5,from:["盗賊"],hp:110,mp:65,atk:24,def:5,crit:30,skills:["暗殺"]},
+"忍者":{req:10,from:["盗賊","アサシン"],hp:125,mp:90,atk:29,def:7,crit:32,skills:["影分身"]},
+"モンク":{req:5,from:["僧侶"],hp:155,mp:60,atk:22,def:9,crit:12,skills:["気功"]},
+"パラディン":{req:10,from:["僧侶","騎士"],hp:210,mp:75,atk:25,def:17,crit:7,skills:["聖撃"]},
+"レンジャー":{req:5,from:["弓使い"],hp:125,mp:70,atk:23,def:7,crit:24,skills:["連射"]},
+"錬金術師":{req:10,from:["商人","魔法使い"],hp:115,mp:110,atk:22,def:6,crit:10,skills:["爆薬"]},
+"魔剣士":{req:15,from:["戦士","魔法使い"],hp:180,mp:95,atk:34,def:10,crit:15,skills:["魔刃"]},
+"竜騎士":{req:15,from:["騎士","弓使い"],hp:220,mp:80,atk:36,def:14,crit:18,skills:["竜槍"]},
+"ネクロマンサー":{req:15,from:["賢者","アサシン"],hp:125,mp:160,atk:35,def:6,crit:18,skills:["死霊"]},
+"勇者":{req:20,from:["パラディン","魔剣士","竜騎士"],hp:240,mp:120,atk:42,def:18,crit:20,skills:["英雄剣"]},
+"魔王":{req:20,from:["大魔導士","ネクロマンサー"],hp:230,mp:190,atk:48,def:14,crit:25,skills:["終焉"]}};
+const EN=["スライム","ゴブリン","骸骨兵","盗賊団","闇狼","オーク","魔獣","深淵騎士","古代竜"];
+let p=JSON.parse(localStorage.getItem(KEY)||"null");
+function fresh(){return{job:null,level:1,xp:0,floor:1,gold:150,hp:0,maxHp:0,mp:0,maxMp:0,atk:0,def:0,crit:0,points:0,pots:3,inv:[],eq:{weapon:null,armor:null,ring:null},forge:[],enemy:null,logs:["街へようこそ。"],quests:{kills:0,forge:0},kills:0,bosses:0,deaths:0,highest:1,tab:"town",buff:0}}
+if(!p)p=fresh();
+const save=()=>localStorage.setItem(KEY,JSON.stringify(p));
+const rnd=(a,b)=>Math.floor(Math.random()*(b-a+1))+a;
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+function xpReq(){return Math.floor(90*Math.pow(p.level,1.35))}
+function rarity(){let x=Math.random()*100,t=0;for(const r of R){t+=r.c;if(x<=t)return r}return R[0]}
+function log(s){p.logs.unshift(s);p.logs=p.logs.slice(0,40)}
+function applyJob(name,first=false){
+ const j=JOBS[name];p.job=name;
+ if(first){p.level=1;p.xp=0;p.points=0}
+ p.maxHp=j.hp+(p.level-1)*10;p.maxMp=j.mp+(p.level-1)*5;p.atk=j.atk+(p.level-1)*2;p.def=j.def+Math.floor((p.level-1)*.7);p.crit=j.crit;
+ p.hp=p.maxHp;p.mp=p.maxMp;
+ log("✨ "+name+"へ転職した！");
+ save();render()
+}
+function chooseStart(n){applyJob(n,true);p.tab="town";save();render()}
+function gainXP(x){p.xp+=x;while(p.xp>=xpReq()){p.xp-=xpReq();p.level++;p.points+=3;p.maxHp+=10;p.maxMp+=5;p.atk+=2;p.def++;p.hp=p.maxHp;p.mp=p.maxMp;log("🎉 レベルアップ！ Lv."+p.level)}}
+function makeItem(){
+ const rr=rarity(),type=pick(["weapon","armor","ring"]),base=4+p.floor*.5,m=rr.m;
+ let it={id:Date.now()+Math.random(),type,rarity:rr.id,rname:rr.n,lv:0,atk:0,def:0,hp:0,mp:0,crit:0,name:""};
+ if(type==="weapon"){it.name=pick(["灰鉄の剣","月影刀","紅蓮槍","星砕き"]);it.atk=Math.floor(base*m)}
+ if(type==="armor"){it.name=pick(["旅人の服","黒鉄鎧","聖鎧","竜鱗鎧"]);it.def=Math.floor(base*.75*m);it.hp=Math.floor(base*3*m)}
+ if(type==="ring"){it.name=pick(["古い指輪","炎の指輪","月輪","竜王の指輪"]);it.crit=Math.floor(base*.7*m);it.mp=Math.floor(base*2*m)}
+ for(let i=0;i<(rr.id==="common"?0:rr.id==="magic"?1:rr.id==="rare"?2:rr.id==="epic"?3:rr.id==="legendary"?4:5);i++){let a=pick(["atk","def","hp","mp","crit"]);it[a]+=rnd(1,Math.max(2,Math.floor(p.floor*.3)))}return it
+}
+function itemText(i){let a=[];if(i.atk)a.push("攻+"+i.atk);if(i.def)a.push("防+"+i.def);if(i.hp)a.push("HP+"+i.hp);if(i.mp)a.push("MP+"+i.mp);if(i.crit)a.push("会心+"+i.crit+"%");if(i.lv)a.push("強化+"+i.lv);return a.join(" / ")}
+function equip(id){
+ const i=p.inv.find(x=>x.id==id);if(!i)return;const old=p.eq[i.type];if(old)removeStats(old);p.eq[i.type]=i;addStats(i);log("🛡️ "+i.name+"を装備");save();render()
+}
+function addStats(i){p.atk+=i.atk;p.def+=i.def;p.maxHp+=i.hp;p.maxMp+=i.mp;p.crit+=i.crit;p.hp=Math.min(p.hp,p.maxHp);p.mp=Math.min(p.mp,p.maxMp)}
+function removeStats(i){p.atk-=i.atk;p.def-=i.def;p.maxHp-=i.hp;p.maxMp-=i.mp;p.crit-=i.crit}
+function forge(id){
+ const i=p.inv.find(x=>x.id==id);if(!i)return;let cost=(i.lv+1)*80+p.floor*5;
+ if(p.gold<cost){log("💰 強化費用が足りない");return}
+ p.gold-=cost;if(Math.random()<.82){if(p.eq[i.type]?.id==i.id)removeStats(i);i.lv++;i.atk=Math.floor(i.atk*1.09)+1;i.def=Math.floor(i.def*1.09);i.hp=Math.floor(i.hp*1.09);i.mp=Math.floor(i.mp*1.09);i.crit+=i.lv%3===0?1:0;if(p.eq[i.type]?.id==i.id)addStats(i);p.quests.forge++;log("🔨 "+i.name+"が+"+i.lv+"になった！")}else log("💥 強化失敗……素材だけ失われた");save();render()
+}
+function spawn(){
+ let boss=p.floor%10===0, elite=!boss&&Math.random()<.16,n=pick(EN),scale=1+p.floor*.11;
+ let hp=Math.floor((60+p.floor*10)*scale*(boss?4:elite?1.8:1)),atk=Math.floor((7+p.floor*.7)*scale*(boss?1.7:elite?1.35:1)),def=Math.floor(p.floor*.3);
+ p.enemy={name:n,icon:boss?"👑":elite?"💜":"👹",hp,maxHp:hp,atk,def,boss,elite};log((boss?"👑 BOSS ":"")+(elite?"💜 ELITE ":"")+"「"+n+"」出現！");save()
+}
+function dmg(mult=1,critBonus=0){let c=Math.random()*100<p.crit+critBonus;let d=Math.max(1,Math.floor((p.atk+rnd(0,p.level))*mult*(c?2:1))-p.enemy.def);return[d,c]}
+function enemyTurn(){let d=Math.max(1,p.enemy.atk-p.def+rnd(0,3));p.hp-=d;log("💥 "+d+"ダメージ受けた");if(p.hp<=0){p.deaths++;p.gold=Math.floor(p.gold*.9);p.hp=Math.floor(p.maxHp*.5);p.mp=Math.floor(p.maxMp*.5);p.enemy=null;log("💀 力尽きた……街へ戻った");p.tab="town"}}
+function attack(){if(!p.enemy){spawn();render();return}let[d,c]=dmg();p.enemy.hp-=d;log("⚔️ "+d+"ダメージ"+(c?" CRITICAL!":""));if(p.enemy.hp<=0)win();else enemyTurn();save();render()}
+function skill(){
+ if(!p.enemy)return;let j=p.job,cost=j.includes("魔")||j==="賢者"||j==="大魔導士"||j==="魔王"?30:20;if(p.mp<cost){log("🔮 MP不足");render();return}p.mp-=cost;
+ let mult=1.8;if(["大魔導士","魔王","賢者"].includes(j))mult=3.2;if(["アサシン","忍者"].includes(j))mult=2.7;if(["勇者","魔剣士","竜騎士"].includes(j))mult=3.4;
+ if(j==="僧侶"||j==="パラディン"){let h=Math.floor(p.maxHp*.35);p.hp=Math.min(p.maxHp,p.hp+h);log("💚 "+h+"回復")}else{let[d,c]=dmg(mult,j==="アサシン"||j==="忍者"?35:0);p.enemy.hp-=d;log("✨ "+j+"のスキル！ "+d+"ダメージ"+(c?" CRITICAL!":""))}
+ if(p.enemy&&p.enemy.hp<=0)win();else if(p.enemy)enemyTurn();save();render()
+}
+function win(){
+ let e=p.enemy,x=(25+p.floor*7)*(e.boss?5:e.elite?2:1),g=rnd(15,30+p.floor*3)*(e.boss?5:e.elite?2:1);gainXP(x);p.gold+=g;p.kills++;p.quests.kills++;if(Math.random()<(e.boss?1:e.elite?.8:.32)){let i=makeItem();p.inv.unshift(i);log("💎 "+i.rname+"「"+i.name+"」入手！")}log("🏆 "+x+"XP / "+g+"G");if(e.boss){p.bosses++;p.floor++;p.highest=Math.max(p.highest,p.floor);p.hp=p.maxHp;p.mp=p.maxMp;log("🏰 第"+p.floor+"階へ！")}p.enemy=null}
+function heal(){if(p.pots<=0){log("🧪 ポーションがない");return}p.pots--;p.hp=Math.min(p.maxHp,p.hp+Math.floor(p.maxHp*.45));log("🧪 回復した");save();render()}
+function upgrade(s){if(p.points<=0)return;p.points--;if(s==="atk")p.atk++;if(s==="def")p.def++;if(s==="hp"){p.maxHp+=10;p.hp+=10}if(s==="mp"){p.maxMp+=5;p.mp+=5}if(s==="crit")p.crit++;save();render()}
+function hotel(){let c=25+p.level*3;if(p.gold<c){log("💰 宿代が足りない");return}p.gold-=c;p.hp=p.maxHp;p.mp=p.maxMp;p.buff=3;log("🏨 宿屋で休んだ。次の3戦、経験値+50%");save();render()}
+function dungeon(){p.tab="dungeon";if(!p.enemy)spawn();render()}
+function tab(t){p.tab=t;render()}
+function sell(id){let k=p.inv.findIndex(x=>x.id==id),i=p.inv[k];if(!i||p.eq[i.type]?.id==i.id){log("装備中は売れません");return}p.gold+=Math.max(10,Math.floor((i.atk+i.def*1.5+i.hp*.08+i.mp*.1+i.crit*2)*3));p.inv.splice(k,1);save();render()}
+function reset(){if(confirm("最初からやり直しますか？")){localStorage.removeItem(KEY);location.reload()}}
+function jobHTML(){return Object.entries(JOBS).map(([n,j])=>{let ok=!j.req||p.level>=j.req&&j.from?.includes(p.job);let now=p.job===n;return `<div class="item ${ok?'':'locked'}"><b>${n}</b> <span class="small">${j.req?"Lv."+j.req+" / "+j.from.join("・"):"初期職"}</span><div class="small">HP${j.hp} 攻${j.atk} 防${j.def} 会心${j.crit}%</div><button ${ok&&!now?"":"disabled"} onclick="applyJob('${n}')">${now?"現在の職業":ok?"転職する":"条件未達"}</button></div>`}).join("")}
+function invHTML(){return p.inv.length?p.inv.slice(0,40).map(i=>`<div class="item"><div class="itemhead"><b class="${i.rarity}">${i.rname}「${i.name}」</b><span>${i.type==="weapon"?"⚔️":i.type==="armor"?"🛡️":"💍"}</span></div><div class="small">${itemText(i)}</div><div class="row"><button onclick="equip(${i.id})">装備</button><button class="gold" onclick="forge(${i.id})">🔨 強化</button></div><button class="red" onclick="sell(${i.id})">売却</button></div>`).join(""):"<div class='small'>まだ装備がありません。</div>"}
+function base(){
+ return `<div class="card"><div style="display:flex;justify-content:space-between"><b>Lv.${p.level} ${p.job}</b><span class="gold">💰${p.gold}G</span></div><div class="small">第${p.floor}階 / 最高${p.highest}階</div><div>❤️ ${p.hp}/${p.maxHp}</div><div class="bar"><div class="fill hp" style="width:${p.hp/p.maxHp*100}%"></div></div><div>🔮 ${p.mp}/${p.maxMp}</div><div class="bar"><div class="fill mp" style="width:${p.mp/p.maxMp*100}%"></div></div><div>⭐ XP ${p.xp}/${xpReq()}</div><div class="bar"><div class="fill xp" style="width:${p.xp/xpReq()*100}%"></div></div><div class="row3"><div class="stat"><small>攻撃</small><b>${p.atk}</b></div><div class="stat"><small>防御</small><b>${p.def}</b></div><div class="stat"><small>会心</small><b>${p.crit}%</b></div></div></div><div class="tabs"><button onclick="tab('town')">🏘️街</button><button onclick="tab('dungeon')">🏰冒険</button><button onclick="tab('menu')">🎒育成</button></div>`
+}
+function town(){
+ return `<div class="card center"><div class="big">🏘️</div><h2>灰燼の街</h2><div class="small">冒険者たちが集う、あなたの拠点。</div></div><div class="row"><button onclick="hotel()">🏨 宿屋<br><span class="small">全回復・冒険バフ</span></button><button onclick="tab('forge')">🔨 鍛冶屋<br><span class="small">装備を強化</span></button><button onclick="tab('job')">🏛️ 転職所<br><span class="small">新しい職業</span></button><button onclick="tab('guild')">📜 ギルド<br><span class="small">依頼と報酬</span></button></div><button class="green" onclick="dungeon()">🏰 ダンジョンへ出発</button>`
+}
+function battle(){
+ let e=p.enemy;if(!e)return `<div class="card center"><div class="big">🗺️</div><button onclick="spawn();render()">探索開始</button></div>`;
+ return `<div class="card center"><div class="small">${e.boss?"👑 BOSS":e.elite?"💜 ELITE":"ENEMY"}</div><div class="big">${e.icon}</div><h2>${e.name}</h2><div class="bar"><div class="fill hp" style="width:${Math.max(0,e.hp)/e.maxHp*100}%"></div></div><div class="small">HP ${Math.max(0,e.hp)}/${e.maxHp} / 攻${e.atk} 防${e.def}</div><div class="row"><button onclick="attack()">⚔️ 攻撃</button><button onclick="skill()">✨ 職業スキル</button></div><button onclick="heal()">🧪 ポーション (${p.pots})</button></div>`
+}
+function forge(){return `<div class="card"><h2>🔨 鍛冶屋</h2><div class="small">強化費用はレベルと階層で増加。失敗することもある。</div>${invHTML()}</div>`}
+function menu(){return `<div class="card"><h2>🎒 育成</h2><div class="small">未使用ポイント：${p.points}</div><div class="row"><button onclick="upgrade('atk')">⚔️ 攻撃+1</button><button onclick="upgrade('def')">🛡️ 防御+1</button><button onclick="upgrade('hp')">❤️ HP+10</button><button onclick="upgrade('mp')">🔮 MP+5</button><button onclick="upgrade('crit')">🎯 会心+1%</button></div></div><div class="card"><h2>🎒 装備</h2>${invHTML()}</div><div class="card"><h2>📜 記録</h2><div class="row3"><div class="stat"><small>撃破</small><b>${p.kills}</b></div><div class="stat"><small>ボス</small><b>${p.bosses}</b></div><div class="stat"><small>死亡</small><b>${p.deaths}</b></div></div></div><button class="red" onclick="reset()">データをリセット</button>`}
+function job(){return `<div class="card"><h2>🏛️ 転職所</h2><div class="small">条件を満たした職業へ転職できます。職業は20種類以上。</div>${jobHTML()}</div>`}
+function guild(){let a=p.quests.kills>=10,b=p.quests.forge>=3;return `<div class="card"><h2>📜 冒険者ギルド</h2><div class="item"><b>討伐依頼</b><div class="small">敵を10体倒す (${Math.min(10,p.quests.kills)}/10)</div><button ${a?"":"disabled"} onclick="p.gold+=300;p.quests.kills=0;log('📜 討伐報酬300G');save();render()">報酬 300G</button></div><div class="item"><b>鍛冶依頼</b><div class="small">装備を3回強化 (${Math.min(3,p.quests.forge)}/3)</div><button ${b?"":"disabled"} onclick="p.gold+=500;p.quests.forge=0;log('📜 鍛冶報酬500G');save();render()">報酬 500G</button></div></div>`}
+function logs(){return `<div class="card"><h3>📜 ログ</h3><div class="log">${p.logs.map(x=>`<div>${x}</div>`).join("")}</div></div>`}
+function render(){
+ const app=document.getElementById("app");
+ if(!p.job){app.innerHTML=`<div class="card center"><h1>🔥 灰燼のクロニクル</h1><p class="sub">街から始まり、転職を重ね、最強を目指す育成RPG</p><h3>最初の職業を選択</h3>${["戦士","魔法使い","盗賊","僧侶","弓使い","商人"].map(n=>`<button onclick="chooseStart('${n}')">${n}</button>`).join("")}</div>`;return}
+ let body=p.tab==="town"?town():p.tab==="dungeon"?battle():p.tab==="forge"?forge():p.tab==="job"?job():p.tab==="guild"?guild():menu();
+ app.innerHTML=`<h1>🔥 灰燼のクロニクル</h1><div class="sub">街を育て、装備を鍛え、転職し、深淵へ。</div>${base()}${body}${logs()}`
+}
+render();
+</script>
+</body>
+</html>
