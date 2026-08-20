@@ -1,0 +1,3203 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>灰燼のクロニクル</title>
+
+<style>
+*{
+  box-sizing:border-box;
+  -webkit-tap-highlight-color:transparent;
+}
+
+body{
+  margin:0;
+  background:
+    radial-gradient(circle at top,#29253b 0,#15151d 45%,#0d0e13 100%);
+  color:#f5f5f5;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+}
+
+button{
+  border:0;
+  border-radius:12px;
+  padding:12px;
+  margin:4px 0;
+  background:#6655c7;
+  color:white;
+  font-weight:bold;
+  font-size:14px;
+}
+
+button:disabled{
+  opacity:.35;
+}
+
+button.green{background:#38785c}
+button.red{background:#8d3f4c}
+button.gold{background:#92712c}
+button.dark{background:#30313d}
+
+#app{
+  max-width:760px;
+  margin:auto;
+  padding:10px 10px 45px;
+}
+
+h1,h2,h3{
+  margin:6px 0 10px;
+}
+
+.sub{
+  color:#aaa;
+  font-size:12px;
+}
+
+.card{
+  background:rgba(29,29,40,.96);
+  border:1px solid #393947;
+  border-radius:17px;
+  padding:12px;
+  margin:9px 0;
+  box-shadow:0 8px 25px #0005;
+}
+
+.center{text-align:center}
+
+.big{
+  font-size:50px;
+  text-align:center;
+}
+
+.small{
+  font-size:11px;
+  color:#aaa;
+}
+
+.row{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:6px;
+}
+
+.row3{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:6px;
+}
+
+.stat{
+  background:#111219;
+  border-radius:11px;
+  padding:9px 5px;
+  text-align:center;
+}
+
+.stat small{
+  display:block;
+  color:#999;
+}
+
+.stat b{
+  font-size:17px;
+}
+
+.bar{
+  height:10px;
+  background:#090a0f;
+  border-radius:10px;
+  overflow:hidden;
+  margin:4px 0 8px;
+}
+
+.fill{
+  height:100%;
+}
+
+.hp{background:#d6505c}
+.mp{background:#5579d7}
+.xp{background:#925dcc}
+
+.tabs{
+  position:sticky;
+  top:0;
+  z-index:10;
+  background:#15151d;
+  padding:5px 0;
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:5px;
+}
+
+.tabs button{
+  font-size:12px;
+  padding:9px 4px;
+}
+
+.item{
+  background:#111219;
+  border:1px solid #292a35;
+  border-radius:13px;
+  padding:10px;
+  margin:7px 0;
+}
+
+.itemhead{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:7px;
+}
+
+.equipment-slot{
+  border:1px solid #353643;
+  background:linear-gradient(145deg,#161722,#101117);
+  border-radius:14px;
+  padding:11px;
+  margin:7px 0;
+}
+
+.slot-title{
+  color:#aaa;
+  font-size:11px;
+  margin-bottom:5px;
+}
+
+.empty{
+  color:#666;
+  text-align:center;
+  padding:10px;
+}
+
+.common{color:#ddd}
+.magic{color:#63a8ff}
+.rare{color:#f0ca48}
+.epic{color:#d77aff}
+.legendary{color:#ff914b}
+.mythic{color:#ff55aa}
+
+.tag{
+  display:inline-block;
+  padding:3px 7px;
+  border-radius:7px;
+  background:#292a37;
+  font-size:10px;
+  margin:2px;
+}
+
+.compare{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:7px;
+}
+
+.up{color:#5de08c}
+.down{color:#ff6565}
+
+.log{
+  max-height:170px;
+  overflow:auto;
+  font-size:12px;
+}
+
+.log div{
+  border-bottom:1px solid #292a35;
+  padding:4px 0;
+}
+
+.enemy{
+  text-align:center;
+}
+
+.enemy-icon{
+  font-size:58px;
+}
+
+.danger{
+  color:#ff6c6c;
+}
+
+.good{
+  color:#6be29b;
+}
+
+.locked{
+  opacity:.42;
+}
+
+.inventory-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:7px;
+}
+
+.inventory-card{
+  background:#111219;
+  border:1px solid #30313d;
+  border-radius:12px;
+  padding:9px;
+}
+
+@media(max-width:500px){
+  .inventory-grid{
+    grid-template-columns:1fr;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<div id="app"></div>
+
+<script>
+
+/* =========================================================
+   基本設定
+========================================================= */
+
+const SAVE_KEY = "HAIJIN_CHRONICLE_V2";
+
+const RARITIES = [
+  {id:"common",name:"コモン",mult:1.0,chance:54},
+  {id:"magic",name:"マジック",mult:1.25,chance:26},
+  {id:"rare",name:"レア",mult:1.6,chance:12},
+  {id:"epic",name:"エピック",mult:2.1,chance:5.5},
+  {id:"legendary",name:"レジェンダリー",mult:3.1,chance:2},
+  {id:"mythic",name:"ミシック",mult:4.4,chance:.5}
+];
+
+const SLOT_NAMES = {
+  weapon:"⚔️ 武器",
+  head:"🪖 頭",
+  armor:"🛡️ 胴",
+  legs:"👢 足",
+  ring:"💍 指輪",
+  accessory:"📿 アクセサリー"
+};
+
+const WEAPON_NAMES = [
+  "鉄の剣",
+  "月影刀",
+  "紅蓮剣",
+  "星砕き",
+  "黒曜の大剣",
+  "聖騎士の剣",
+  "竜王の牙",
+  "魔神の刃"
+];
+
+const HEAD_NAMES = [
+  "旅人の帽子",
+  "鉄兜",
+  "黒鉄兜",
+  "魔導帽",
+  "聖騎士の兜",
+  "竜鱗兜"
+];
+
+const ARMOR_NAMES = [
+  "旅人の服",
+  "革鎧",
+  "鉄鎧",
+  "黒鉄鎧",
+  "聖鎧",
+  "竜鱗鎧"
+];
+
+const LEG_NAMES = [
+  "旅人の靴",
+  "革ブーツ",
+  "鉄脚甲",
+  "黒影の靴",
+  "聖騎士の具足",
+  "竜鱗の具足"
+];
+
+const RING_NAMES = [
+  "古い指輪",
+  "力の指輪",
+  "炎の指輪",
+  "月輪",
+  "竜王の指輪"
+];
+
+const ACCESSORY_NAMES = [
+  "古びたお守り",
+  "冒険者のお守り",
+  "魔力のペンダント",
+  "英雄の勲章",
+  "深淵の宝珠"
+];
+
+const ENEMIES = [
+  "スライム",
+  "ゴブリン",
+  "骸骨兵",
+  "盗賊団",
+  "闇狼",
+  "オーク",
+  "魔獣",
+  "深淵騎士",
+  "古代竜",
+  "魔界兵"
+];
+
+
+/* =========================================================
+   職業
+========================================================= */
+
+const JOBS = {
+
+  "戦士":{
+    req:1,
+    from:[],
+    hp:145,
+    mp:35,
+    atk:15,
+    def:9,
+    crit:5,
+    skill:"強打"
+  },
+
+  "魔法使い":{
+    req:1,
+    from:[],
+    hp:85,
+    mp:105,
+    atk:18,
+    def:3,
+    crit:8,
+    skill:"火球"
+  },
+
+  "盗賊":{
+    req:1,
+    from:[],
+    hp:105,
+    mp:55,
+    atk:14,
+    def:5,
+    crit:18,
+    skill:"二連撃"
+  },
+
+  "僧侶":{
+    req:1,
+    from:[],
+    hp:115,
+    mp:85,
+    atk:10,
+    def:7,
+    crit:5,
+    skill:"癒し"
+  },
+
+  "弓使い":{
+    req:1,
+    from:[],
+    hp:100,
+    mp:60,
+    atk:16,
+    def:4,
+    crit:14,
+    skill:"狙撃"
+  },
+
+  "商人":{
+    req:1,
+    from:[],
+    hp:110,
+    mp:55,
+    atk:10,
+    def:5,
+    crit:7,
+    skill:"強欲"
+  },
+
+  "騎士":{
+    req:5,
+    from:["戦士"],
+    hp:175,
+    mp:45,
+    atk:19,
+    def:13,
+    crit:6,
+    skill:"盾撃"
+  },
+
+  "バーサーカー":{
+    req:5,
+    from:["戦士"],
+    hp:160,
+    mp:40,
+    atk:26,
+    def:5,
+    crit:11,
+    skill:"狂撃"
+  },
+
+  "賢者":{
+    req:5,
+    from:["魔法使い","僧侶"],
+    hp:105,
+    mp:135,
+    atk:25,
+    def:5,
+    crit:10,
+    skill:"雷撃"
+  },
+
+  "アサシン":{
+    req:5,
+    from:["盗賊"],
+    hp:110,
+    mp:65,
+    atk:25,
+    def:5,
+    crit:30,
+    skill:"暗殺"
+  },
+
+  "モンク":{
+    req:5,
+    from:["僧侶"],
+    hp:155,
+    mp:65,
+    atk:23,
+    def:9,
+    crit:12,
+    skill:"気功"
+  },
+
+  "レンジャー":{
+    req:5,
+    from:["弓使い"],
+    hp:125,
+    mp:70,
+    atk:24,
+    def:7,
+    crit:24,
+    skill:"連射"
+  },
+
+  "大魔導士":{
+    req:10,
+    from:["魔法使い","賢者"],
+    hp:110,
+    mp:175,
+    atk:32,
+    def:5,
+    crit:12,
+    skill:"隕石"
+  },
+
+  "忍者":{
+    req:10,
+    from:["盗賊","アサシン"],
+    hp:130,
+    mp:95,
+    atk:30,
+    def:7,
+    crit:33,
+    skill:"影分身"
+  },
+
+  "パラディン":{
+    req:10,
+    from:["僧侶","騎士"],
+    hp:215,
+    mp:80,
+    atk:26,
+    def:18,
+    crit:8,
+    skill:"聖撃"
+  },
+
+  "錬金術師":{
+    req:10,
+    from:["商人","魔法使い"],
+    hp:120,
+    mp:115,
+    atk:23,
+    def:6,
+    crit:11,
+    skill:"爆薬"
+  },
+
+  "魔剣士":{
+    req:15,
+    from:["戦士","魔法使い"],
+    hp:185,
+    mp:100,
+    atk:35,
+    def:11,
+    crit:16,
+    skill:"魔刃"
+  },
+
+  "竜騎士":{
+    req:15,
+    from:["騎士","弓使い"],
+    hp:225,
+    mp:85,
+    atk:37,
+    def:15,
+    crit:18,
+    skill:"竜槍"
+  },
+
+  "ネクロマンサー":{
+    req:15,
+    from:["賢者","アサシン"],
+    hp:130,
+    mp:165,
+    atk:36,
+    def:6,
+    crit:19,
+    skill:"死霊"
+  },
+
+  "勇者":{
+    req:20,
+    from:["パラディン","魔剣士","竜騎士"],
+    hp:250,
+    mp:125,
+    atk:43,
+    def:19,
+    crit:21,
+    skill:"英雄剣"
+  },
+
+  "魔王":{
+    req:20,
+    from:["大魔導士","ネクロマンサー"],
+    hp:240,
+    mp:195,
+    atk:49,
+    def:15,
+    crit:26,
+    skill:"終焉"
+  },
+
+  "神騎士":{
+    req:30,
+    from:["勇者"],
+    hp:330,
+    mp:160,
+    atk:62,
+    def:28,
+    crit:28,
+    skill:"神聖断罪"
+  },
+
+  "終焉魔導士":{
+    req:30,
+    from:["魔王"],
+    hp:270,
+    mp:260,
+    atk:70,
+    def:17,
+    crit:32,
+    skill:"終焉魔法"
+  }
+
+};
+
+
+/* =========================================================
+   セーブデータ
+========================================================= */
+
+function newGame(){
+
+  return {
+
+    job:null,
+
+    level:1,
+    xp:0,
+    gold:250,
+
+    hp:100,
+    maxHp:100,
+
+    mp:50,
+    maxMp:50,
+
+    atk:0,
+    def:0,
+    crit:0,
+
+    points:0,
+
+    pots:3,
+
+    floor:1,
+    highest:1,
+
+    kills:0,
+    bosses:0,
+    deaths:0,
+
+    quests:{
+      kills:0,
+      forge:0
+    },
+
+    equipment:{
+      weapon:null,
+      head:null,
+      armor:null,
+      legs:null,
+      ring:null,
+      accessory:null
+    },
+
+    inventory:[],
+
+    favorite:[],
+
+    enemy:null,
+
+    selectedItem:null,
+
+    selectedSlot:"weapon",
+
+    tab:"town",
+
+    equipmentTab:"equipped",
+
+    hotelBuff:0,
+
+    logs:[
+      "🔥 灰燼のクロニクルへようこそ！"
+    ]
+  };
+
+}
+
+let player = JSON.parse(localStorage.getItem(SAVE_KEY) || "null");
+
+if(!player){
+  player = newGame();
+}
+
+
+/* =========================================================
+   共通関数
+========================================================= */
+
+function save(){
+  localStorage.setItem(SAVE_KEY,JSON.stringify(player));
+}
+
+function randomInt(min,max){
+  return Math.floor(Math.random()*(max-min+1))+min;
+}
+
+function randomPick(arr){
+  return arr[Math.floor(Math.random()*arr.length)];
+}
+
+function log(text){
+  player.logs.unshift(text);
+  player.logs = player.logs.slice(0,50);
+}
+
+function xpRequired(){
+  return Math.floor(90 * Math.pow(player.level,1.35));
+}
+
+function getRarity(){
+
+  let value = Math.random()*100;
+  let sum = 0;
+
+  for(const r of RARITIES){
+
+    sum += r.chance;
+
+    if(value <= sum){
+      return r;
+    }
+
+  }
+
+  return RARITIES[0];
+}
+
+
+/* =========================================================
+   職業
+========================================================= */
+
+function applyJob(jobName,first=false){
+
+  const job = JOBS[jobName];
+
+  if(!job) return;
+
+  player.job = jobName;
+
+  player.maxHp =
+    job.hp +
+    (player.level-1)*11;
+
+  player.maxMp =
+    job.mp +
+    (player.level-1)*6;
+
+  player.atk =
+    job.atk +
+    (player.level-1)*2;
+
+  player.def =
+    job.def +
+    Math.floor((player.level-1)*.7);
+
+  player.crit = job.crit;
+
+  recalculateEquipmentStats();
+
+  player.hp = player.maxHp;
+  player.mp = player.maxMp;
+
+  log("🏛️ "+jobName+"へ転職した！");
+
+  save();
+  render();
+
+}
+
+function chooseFirstJob(job){
+
+  player = newGame();
+
+  applyJob(job,true);
+
+  player.tab="town";
+
+  save();
+  render();
+
+}
+
+function canChangeJob(jobName){
+
+  const job = JOBS[jobName];
+
+  if(!job) return false;
+
+  if(job.req > player.level) return false;
+
+  if(job.from.length===0) return true;
+
+  return job.from.includes(player.job);
+
+}
+
+
+/* =========================================================
+   ステータス
+========================================================= */
+
+function baseStats(){
+
+  const job = JOBS[player.job];
+
+  return {
+
+    hp:
+      job.hp+
+      (player.level-1)*11,
+
+    mp:
+      job.mp+
+      (player.level-1)*6,
+
+    atk:
+      job.atk+
+      (player.level-1)*2,
+
+    def:
+      job.def+
+      Math.floor((player.level-1)*.7),
+
+    crit:job.crit
+
+  };
+
+}
+
+function recalculateEquipmentStats(){
+
+  if(!player.job) return;
+
+  const base = baseStats();
+
+  player.maxHp = base.hp;
+  player.maxMp = base.mp;
+  player.atk = base.atk;
+  player.def = base.def;
+  player.crit = base.crit;
+
+  for(const slot of Object.keys(player.equipment)){
+
+    const item = player.equipment[slot];
+
+    if(!item) continue;
+
+    player.maxHp += item.hp || 0;
+    player.maxMp += item.mp || 0;
+    player.atk += item.atk || 0;
+    player.def += item.def || 0;
+    player.crit += item.crit || 0;
+
+  }
+
+  player.hp = Math.min(player.hp,player.maxHp);
+  player.mp = Math.min(player.mp,player.maxMp);
+
+}
+
+
+/* =========================================================
+   レベル
+========================================================= */
+
+function gainXP(amount){
+
+  if(player.hotelBuff>0){
+    amount = Math.floor(amount*1.5);
+  }
+
+  player.xp += amount;
+
+  while(player.xp >= xpRequired()){
+
+    player.xp -= xpRequired();
+
+    player.level++;
+
+    player.points += 3;
+
+    recalculateEquipmentStats();
+
+    player.hp = player.maxHp;
+    player.mp = player.maxMp;
+
+    log("🎉 レベルアップ！ Lv."+player.level);
+
+  }
+
+}
+
+
+/* =========================================================
+   装備生成
+========================================================= */
+
+function randomSlot(){
+
+  return randomPick([
+    "weapon",
+    "head",
+    "armor",
+    "legs",
+    "ring",
+    "accessory"
+  ]);
+
+}
+
+function createEquipment(){
+
+  const rarity = getRarity();
+
+  const slot = randomSlot();
+
+  const multiplier = rarity.mult;
+
+  const base =
+    5 +
+    player.floor*.8 +
+    player.level*.5;
+
+  const item = {
+
+    id:
+      Date.now()+
+      Math.random(),
+
+    slot:slot,
+
+    rarity:rarity.id,
+
+    rarityName:rarity.name,
+
+    name:"",
+
+    level:0,
+
+    atk:0,
+    def:0,
+    hp:0,
+    mp:0,
+    crit:0,
+
+    effects:[]
+
+  };
+
+
+  if(slot==="weapon"){
+
+    item.name=randomPick(WEAPON_NAMES);
+
+    item.atk=Math.floor(base*1.7*mult);
+
+  }
+
+
+  if(slot==="head"){
+
+    item.name=randomPick(HEAD_NAMES);
+
+    item.def=Math.floor(base*.65*mult);
+
+    item.hp=Math.floor(base*2*mult);
+
+  }
+
+
+  if(slot==="armor"){
+
+    item.name=randomPick(ARMOR_NAMES);
+
+    item.def=Math.floor(base*1.15*mult);
+
+    item.hp=Math.floor(base*4*mult);
+
+  }
+
+
+  if(slot==="legs"){
+
+    item.name=randomPick(LEG_NAMES);
+
+    item.def=Math.floor(base*.8*mult);
+
+    item.hp=Math.floor(base*2.5*mult);
+
+  }
+
+
+  if(slot==="ring"){
+
+    item.name=randomPick(RING_NAMES);
+
+    item.crit=Math.floor(base*.7*mult);
+
+    item.atk=Math.floor(base*.5*mult);
+
+  }
+
+
+  if(slot==="accessory"){
+
+    item.name=randomPick(ACCESSORY_NAMES);
+
+    item.hp=Math.floor(base*2.5*mult);
+
+    item.mp=Math.floor(base*2*mult);
+
+    item.crit=Math.floor(base*.5*mult);
+
+  }
+
+
+  const effectCount =
+    rarity.id==="common" ? 0 :
+    rarity.id==="magic" ? 1 :
+    rarity.id==="rare" ? 2 :
+    rarity.id==="epic" ? 3 :
+    rarity.id==="legendary" ? 4 : 5;
+
+
+  const effects = [
+
+    "敵撃破時HP回復",
+    "敵撃破時MP回復",
+    "経験値アップ",
+    "ゴールド獲得量アップ",
+    "ボス特攻",
+    "会心ダメージアップ",
+    "火属性ダメージアップ",
+    "防御貫通",
+    "被ダメージ軽減",
+    "スキル威力アップ"
+
+  ];
+
+
+  for(let i=0;i<effectCount;i++){
+
+    const effect=randomPick(effects);
+
+    if(!item.effects.includes(effect)){
+
+      item.effects.push(effect);
+
+    }
+
+  }
+
+  return item;
+
+}
+
+
+/* =========================================================
+   装備テキスト
+========================================================= */
+
+function itemStatsText(item){
+
+  const result=[];
+
+  if(item.atk)
+    result.push("⚔️ 攻撃 +"+item.atk);
+
+  if(item.def)
+    result.push("🛡️ 防御 +"+item.def);
+
+  if(item.hp)
+    result.push("❤️ HP +"+item.hp);
+
+  if(item.mp)
+    result.push("🔮 MP +"+item.mp);
+
+  if(item.crit)
+    result.push("🎯 会心 +"+item.crit+"%");
+
+  return result;
+
+}
+
+function effectHTML(item){
+
+  if(!item.effects || item.effects.length===0)
+    return "";
+
+  return item.effects
+    .map(x=>`<span class="tag">✨ ${x}</span>`)
+    .join("");
+
+}
+
+
+/* =========================================================
+   装備する
+========================================================= */
+
+function equipItem(id){
+
+  const item =
+    player.inventory.find(x=>x.id==id);
+
+  if(!item) return;
+
+  const slot=item.slot;
+
+  const old=player.equipment[slot];
+
+  if(old){
+
+    player.inventory.push(old);
+
+  }
+
+  player.inventory =
+    player.inventory.filter(x=>x.id!=id);
+
+  player.equipment[slot]=item;
+
+  recalculateEquipmentStats();
+
+  log("🛡️ "+item.name+"を装備した！");
+
+  player.selectedItem=null;
+
+  save();
+  render();
+
+}
+
+
+/* =========================================================
+   装備を外す
+========================================================= */
+
+function unequip(slot){
+
+  const item=player.equipment[slot];
+
+  if(!item) return;
+
+  player.inventory.push(item);
+
+  player.equipment[slot]=null;
+
+  recalculateEquipmentStats();
+
+  log("🎒 "+item.name+"を外した");
+
+  save();
+  render();
+
+}
+
+
+/* =========================================================
+   お気に入り
+========================================================= */
+
+function toggleFavorite(id){
+
+  const index=
+    player.favorite.indexOf(id);
+
+  if(index>=0){
+
+    player.favorite.splice(index,1);
+
+  }else{
+
+    player.favorite.push(id);
+
+  }
+
+  save();
+  render();
+
+}
+
+
+/* =========================================================
+   強化
+========================================================= */
+
+function enhanceItem(id){
+
+  const item=
+    player.inventory.find(x=>x.id==id);
+
+  if(!item){
+
+    log("強化する装備が見つかりません");
+
+    return;
+
+  }
+
+  const cost=
+    100+
+    item.level*100+
+    player.floor*15;
+
+  if(player.gold<cost){
+
+    log("💰 強化費用が足りない！");
+
+    return;
+
+  }
+
+  player.gold-=cost;
+
+  const success =
+    Math.random() <
+    Math.max(.55,.86-item.level*.025);
+
+
+  if(!success){
+
+    log("💥 強化失敗……");
+
+    save();
+    render();
+    return;
+
+  }
+
+
+  item.level++;
+
+  if(item.atk)
+    item.atk=
+      Math.floor(item.atk*1.09)+1;
+
+  if(item.def)
+    item.def=
+      Math.floor(item.def*1.09)+1;
+
+  if(item.hp)
+    item.hp=
+      Math.floor(item.hp*1.09)+2;
+
+  if(item.mp)
+    item.mp=
+      Math.floor(item.mp*1.09)+1;
+
+  if(item.level%3===0)
+    item.crit++;
+
+  player.quests.forge++;
+
+  recalculateEquipmentStats();
+
+  log(
+    "🔨 "+
+    item.name+
+    " が +"+
+    item.level+
+    " になった！"
+  );
+
+  save();
+  render();
+
+}
+
+
+/* =========================================================
+   装備比較
+========================================================= */
+
+function compareItem(item){
+
+  if(!item) return "";
+
+  const current=
+    player.equipment[item.slot];
+
+  if(!current){
+
+    return `
+      <div class="card">
+        <h3>📊 装備比較</h3>
+        <div class="small">
+          現在この部位は未装備です。
+        </div>
+      </div>
+    `;
+
+  }
+
+  function diff(a,b){
+
+    const d=(a||0)-(b||0);
+
+    if(d>0)
+      return `<span class="up">+${d}</span>`;
+
+    if(d<0)
+      return `<span class="down">${d}</span>`;
+
+    return `<span>±0</span>`;
+
+  }
+
+  return `
+    <div class="card">
+
+      <h3>🔍 装備比較</h3>
+
+      <div class="compare">
+
+        <div>
+          <div class="small">現在の装備</div>
+          <b class="${current.rarity}">
+            ${current.rarityName}
+            「${current.name}」
+          </b>
+
+          <p>⚔️ ${current.atk||0}</p>
+          <p>🛡️ ${current.def||0}</p>
+          <p>❤️ ${current.hp||0}</p>
+          <p>🔮 ${current.mp||0}</p>
+          <p>🎯 ${current.crit||0}%</p>
+        </div>
+
+
+        <div>
+
+          <div class="small">選択中</div>
+
+          <b class="${item.rarity}">
+            ${item.rarityName}
+            「${item.name}」
+          </b>
+
+          <p>
+            ⚔️ ${item.atk||0}
+            ${diff(item.atk,current.atk)}
+          </p>
+
+          <p>
+            🛡️ ${item.def||0}
+            ${diff(item.def,current.def)}
+          </p>
+
+          <p>
+            ❤️ ${item.hp||0}
+            ${diff(item.hp,current.hp)}
+          </p>
+
+          <p>
+            🔮 ${item.mp||0}
+            ${diff(item.mp,current.mp)}
+          </p>
+
+          <p>
+            🎯 ${item.crit||0}%
+            ${diff(item.crit,current.crit)}
+          </p>
+
+        </div>
+
+      </div>
+
+    </div>
+  `;
+
+}
+
+
+/* =========================================================
+   敵
+========================================================= */
+
+function spawnEnemy(){
+
+  const boss =
+    player.floor%10===0;
+
+  const elite =
+    !boss &&
+    Math.random()<.17;
+
+  const scale=
+    1+
+    player.floor*.12;
+
+  const hp=
+    Math.floor(
+      (65+
+      player.floor*12)*
+      scale*
+      (boss?4.5:elite?1.8:1)
+    );
+
+  const atk=
+    Math.floor(
+      (8+
+      player.floor*.75)*
+      scale*
+      (boss?1.7:elite?1.3:1)
+    );
+
+  const def=
+    Math.floor(player.floor*.35);
+
+
+  player.enemy={
+
+    name:randomPick(ENEMIES),
+
+    hp:hp,
+    maxHp:hp,
+
+    atk:atk,
+    def:def,
+
+    boss:boss,
+    elite:elite
+
+  };
+
+
+  log(
+    (boss?"👑 BOSS ":"")+
+    (elite?"💜 ELITE ":"")+
+    player.enemy.name+
+    "が現れた！"
+  );
+
+}
+
+
+/* =========================================================
+   戦闘
+========================================================= */
+
+function calculateDamage(mult=1){
+
+  let critical =
+    Math.random()*100 <
+    player.crit;
+
+  let damage =
+    Math.floor(
+      (player.atk+
+      randomInt(0,player.level))*
+      mult
+    );
+
+  if(critical)
+    damage*=2;
+
+  damage=
+    Math.max(
+      1,
+      damage-player.enemy.def
+    );
+
+  return {
+    damage:damage,
+    critical:critical
+  };
+
+}
+
+
+function enemyAttack(){
+
+  if(!player.enemy)
+    return;
+
+  const damage=
+    Math.max(
+      1,
+      player.enemy.atk-
+      player.def+
+      randomInt(0,3)
+    );
+
+  player.hp-=damage;
+
+  log("💥 "+damage+"ダメージ受けた！");
+
+
+  if(player.hp<=0){
+
+    player.deaths++;
+
+    player.gold=
+      Math.floor(player.gold*.9);
+
+    player.hp=
+      Math.floor(player.maxHp*.5);
+
+    player.mp=
+      Math.floor(player.maxMp*.5);
+
+    player.enemy=null;
+
+    player.tab="town";
+
+    log("💀 力尽きた……街へ戻った");
+
+  }
+
+}
+
+
+function normalAttack(){
+
+  if(!player.enemy){
+
+    spawnEnemy();
+    render();
+    return;
+
+  }
+
+  const result=
+    calculateDamage(1);
+
+  player.enemy.hp-=result.damage;
+
+  log(
+    "⚔️ "+
+    result.damage+
+    "ダメージ"+
+    (result.critical?" CRITICAL!":"")
+  );
+
+
+  if(player.enemy.hp<=0){
+
+    victory();
+
+  }else{
+
+    enemyAttack();
+
+  }
+
+
+  if(player.hotelBuff>0)
+    player.hotelBuff--;
+
+  save();
+  render();
+
+}
+
+
+function useSkill(){
+
+  if(!player.enemy)
+    return;
+
+  const job=JOBS[player.job];
+
+  const cost=30;
+
+  if(player.mp<cost){
+
+    log("🔮 MPが足りない！");
+
+    render();
+    return;
+
+  }
+
+  player.mp-=cost;
+
+  let multiplier=1.8;
+
+
+  if(
+    ["大魔導士","魔王","終焉魔導士"]
+      .includes(player.job)
+  ){
+
+    multiplier=3.3;
+
+  }
+
+
+  if(
+    ["アサシン","忍者"]
+      .includes(player.job)
+  ){
+
+    multiplier=2.7;
+
+  }
+
+
+  if(
+    ["勇者","神騎士","魔剣士","竜騎士"]
+      .includes(player.job)
+  ){
+
+    multiplier=3.4;
+
+  }
+
+
+  if(
+    player.job==="僧侶" ||
+    player.job==="パラディン"
+  ){
+
+    const heal=
+      Math.floor(player.maxHp*.35);
+
+    player.hp=
+      Math.min(
+        player.maxHp,
+        player.hp+heal
+      );
+
+    log(
+      "💚 "+
+      heal+
+      "HP回復！"
+    );
+
+  }else{
+
+    const result=
+      calculateDamage(multiplier);
+
+    player.enemy.hp-=result.damage;
+
+    log(
+      "✨ "+
+      job.skill+
+      "！ "+
+      result.damage+
+      "ダメージ"+
+      (result.critical?" CRITICAL!":"")
+    );
+
+  }
+
+
+  if(player.enemy && player.enemy.hp<=0){
+
+    victory();
+
+  }else{
+
+    enemyAttack();
+
+  }
+
+  save();
+  render();
+
+}
+
+
+/* =========================================================
+   勝利
+========================================================= */
+
+function victory(){
+
+  const enemy=player.enemy;
+
+  let xp=
+    25+
+    player.floor*8;
+
+  let gold=
+    randomInt(
+      15,
+      30+
+      player.floor*4
+    );
+
+
+  if(enemy.elite){
+
+    xp*=2;
+    gold*=2;
+
+  }
+
+
+  if(enemy.boss){
+
+    xp*=5;
+    gold*=5;
+
+  }
+
+
+  gainXP(xp);
+
+  player.gold+=gold;
+
+  player.kills++;
+  player.quests.kills++;
+
+  log(
+    "🏆 勝利！ "+
+    xp+"XP / "+
+    gold+"G"
+  );
+
+
+  let dropChance=
+    enemy.boss ? 1 :
+    enemy.elite ? .9 :
+    .3;
+
+
+  if(Math.random()<dropChance){
+
+    const item=createEquipment();
+
+    player.inventory.unshift(item);
+
+    log(
+      "💎 "+
+      item.rarityName+
+      "「"+
+      item.name+
+      "」を入手！"
+    );
+
+  }
+
+
+  if(enemy.boss){
+
+    player.bosses++;
+
+    player.floor++;
+
+    player.highest=
+      Math.max(
+        player.highest,
+        player.floor
+      );
+
+    player.hp=player.maxHp;
+    player.mp=player.maxMp;
+
+    log(
+      "🏰 第"+
+      player.floor+
+      "階へ進んだ！"
+    );
+
+  }
+
+
+  player.enemy=null;
+
+}
+
+
+/* =========================================================
+   ポーション
+========================================================= */
+
+function usePotion(){
+
+  if(player.pots<=0){
+
+    log("🧪 ポーションがない！");
+
+    render();
+    return;
+
+  }
+
+  player.pots--;
+
+  const heal=
+    Math.floor(
+      player.maxHp*.45
+    );
+
+  player.hp=
+    Math.min(
+      player.maxHp,
+      player.hp+heal
+    );
+
+  log(
+    "🧪 "+
+    heal+
+    "HP回復！"
+  );
+
+  save();
+  render();
+
+}
+
+
+/* =========================================================
+   宿屋
+========================================================= */
+
+function stayHotel(){
+
+  const cost=
+    25+
+    player.level*4;
+
+  if(player.gold<cost){
+
+    log("💰 宿代が足りない！");
+
+    render();
+    return;
+
+  }
+
+  player.gold-=cost;
+
+  player.hp=player.maxHp;
+  player.mp=player.maxMp;
+
+  player.hotelBuff=3;
+
+  log(
+    "🏨 宿屋で休んだ！"+
+    " 次の3戦は経験値1.5倍"
+  );
+
+  save();
+  render();
+
+}
+
+
+/* =========================================================
+   ステ振り
+========================================================= */
+
+function spendPoint(stat){
+
+  if(player.points<=0)
+    return;
+
+  player.points--;
+
+  if(stat==="atk")
+    player.atk++;
+
+  if(stat==="def")
+    player.def++;
+
+  if(stat==="hp"){
+    player.maxHp+=10;
+    player.hp+=10;
+  }
+
+  if(stat==="mp"){
+    player.maxMp+=5;
+    player.mp+=5;
+  }
+
+  if(stat==="crit")
+    player.crit++;
+
+  save();
+  render();
+
+}
+
+
+/* =========================================================
+   タブ
+========================================================= */
+
+function changeTab(tab){
+
+  player.tab=tab;
+
+  save();
+  render();
+
+}
+
+
+/* =========================================================
+   装備画面タブ
+========================================================= */
+
+function equipmentTab(tab){
+
+  player.equipmentTab=tab;
+
+  save();
+  render();
+
+}
+
+function selectEquipment(id){
+
+  player.selectedItem=id;
+
+  save();
+  render();
+
+}
+
+
+/* =========================================================
+   装備カード
+========================================================= */
+
+function equipmentCard(item){
+
+  const favorite=
+    player.favorite.includes(item.id);
+
+  const equipped=
+    player.equipment[item.slot]?.id===item.id;
+
+
+  return `
+
+  <div class="inventory-card">
+
+    <div class="itemhead">
+
+      <b class="${item.rarity}">
+        ${item.rarityName}
+        「${item.name}」
+      </b>
+
+      <button
+        class="dark"
+        onclick="toggleFavorite(${item.id})"
+      >
+        ${favorite?"⭐":"☆"}
+      </button>
+
+    </div>
+
+    <div class="small">
+      ${SLOT_NAMES[item.slot]}
+      ${item.level>0?" / +"+item.level:""}
+    </div>
+
+    <div>
+      ${itemStatsText(item)
+        .map(x=>`<div>${x}</div>`)
+        .join("")}
+    </div>
+
+    <div>
+      ${effectHTML(item)}
+    </div>
+
+    ${
+      equipped
+      ?
+      `<div class="good">現在装備中</div>`
+      :
+      `<button onclick="selectEquipment(${item.id})">
+        🔍 詳細・比較
+      </button>`
+    }
+
+  </div>
+
+  `;
+
+}
+
+
+/* =========================================================
+   装備画面
+========================================================= */
+
+function equipmentPage(){
+
+  const selected=
+    player.inventory.find(
+      x=>x.id==player.selectedItem
+    );
+
+
+  let inventory=
+    player.inventory;
+
+
+  if(player.equipmentTab==="favorites"){
+
+    inventory=
+      inventory.filter(
+        x=>player.favorite.includes(x.id)
+      );
+
+  }
+
+
+  if(player.equipmentTab==="weapon"){
+
+    inventory=
+      inventory.filter(
+        x=>x.slot==="weapon"
+      );
+
+  }
+
+
+  if(player.equipmentTab==="armor"){
+
+    inventory=
+      inventory.filter(
+        x=>
+          x.slot==="head" ||
+          x.slot==="armor" ||
+          x.slot==="legs"
+      );
+
+  }
+
+
+  if(player.equipmentTab==="accessory"){
+
+    inventory=
+      inventory.filter(
+        x=>
+          x.slot==="ring" ||
+          x.slot==="accessory"
+      );
+
+  }
+
+
+  return `
+
+  <div class="card">
+
+    <h2>🎒 装備</h2>
+
+    <div class="small">
+      装備を確認・比較・変更できます。
+    </div>
+
+  </div>
+
+
+  <div class="card">
+
+    <h3>📊 キャラクターステータス</h3>
+
+    <div class="row3">
+
+      <div class="stat">
+        <small>攻撃</small>
+        <b>${player.atk}</b>
+      </div>
+
+      <div class="stat">
+        <small>防御</small>
+        <b>${player.def}</b>
+      </div>
+
+      <div class="stat">
+        <small>会心</small>
+        <b>${player.crit}%</b>
+      </div>
+
+    </div>
+
+    <div class="row">
+
+      <div class="stat">
+        <small>最大HP</small>
+        <b>${player.maxHp}</b>
+      </div>
+
+      <div class="stat">
+        <small>最大MP</small>
+        <b>${player.maxMp}</b>
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <div class="card">
+
+    <h3>🛡️ 現在の装備</h3>
+
+    ${Object.keys(SLOT_NAMES).map(slot=>{
+
+      const item=
+        player.equipment[slot];
+
+      if(!item){
+
+        return `
+
+        <div class="equipment-slot">
+
+          <div class="slot-title">
+            ${SLOT_NAMES[slot]}
+          </div>
+
+          <div class="empty">
+            未装備
+          </div>
+
+        </div>
+
+        `;
+
+      }
+
+
+      return `
+
+      <div class="equipment-slot">
+
+        <div class="slot-title">
+          ${SLOT_NAMES[slot]}
+        </div>
+
+        <div class="itemhead">
+
+          <b class="${item.rarity}">
+            ${item.rarityName}
+            「${item.name}」
+          </b>
+
+          <span>
+            ${item.level>0?
+              "+"+item.level:
+              ""}
+          </span>
+
+        </div>
+
+        <div class="small">
+          ${itemStatsText(item).join(" / ")}
+        </div>
+
+        <div>
+          ${effectHTML(item)}
+        </div>
+
+        <button
+          class="dark"
+          onclick="unequip('${slot}')"
+        >
+          外す
+        </button>
+
+      </div>
+
+      `;
+
+    }).join("")}
+
+  </div>
+
+
+  <div class="card">
+
+    <h3>📦 所持装備</h3>
+
+    <div class="tabs">
+
+      <button onclick="equipmentTab('equipped')">
+        全部
+      </button>
+
+      <button onclick="equipmentTab('weapon')">
+        ⚔️武器
+      </button>
+
+      <button onclick="equipmentTab('armor')">
+        🛡️防具
+      </button>
+
+    </div>
+
+    <div class="row">
+
+      <button
+        class="dark"
+        onclick="equipmentTab('accessory')"
+      >
+        💍アクセ
+      </button>
+
+      <button
+        class="dark"
+        onclick="equipmentTab('favorites')"
+      >
+        ⭐お気に入り
+      </button>
+
+    </div>
+
+
+    ${
+      inventory.length===0
+      ?
+      `<div class="empty">
+        この条件の装備はありません。
+      </div>`
+      :
+      `<div class="inventory-grid">
+        ${inventory
+          .map(x=>equipmentCard(x))
+          .join("")}
+      </div>`
+    }
+
+  </div>
+
+
+  ${
+    selected
+    ?
+    `
+    ${compareItem(selected)}
+
+    <div class="card">
+
+      <h3>🔧 ${selected.name}</h3>
+
+      <div class="small">
+        ${selected.rarityName}
+        / ${SLOT_NAMES[selected.slot]}
+        / 強化 +${selected.level}
+      </div>
+
+      <div>
+        ${itemStatsText(selected)
+          .map(x=>`<div>${x}</div>`)
+          .join("")}
+      </div>
+
+      <div>
+        ${effectHTML(selected)}
+      </div>
+
+      <button
+        class="green"
+        onclick="equipItem(${selected.id})"
+      >
+        🛡️ この装備を装備
+      </button>
+
+      <button
+        class="gold"
+        onclick="enhanceItem(${selected.id})"
+      >
+        🔨 強化
+      </button>
+
+      <button
+        class="red"
+        onclick="sellItem(${selected.id})"
+      >
+        💰 売却
+      </button>
+
+    </div>
+    `
+    :
+    ""
+  }
+
+  `;
+
+}
+
+
+/* =========================================================
+   売却
+========================================================= */
+
+function sellItem(id){
+
+  const index=
+    player.inventory.findIndex(
+      x=>x.id==id
+    );
+
+  if(index<0)
+    return;
+
+  const item=
+    player.inventory[index];
+
+  if(
+    player.equipment[item.slot]?.id===
+    item.id
+  ){
+
+    log("装備中のアイテムは売却できません");
+
+    render();
+    return;
+
+  }
+
+
+  const price=
+    Math.max(
+      10,
+      Math.floor(
+        (
+          item.atk+
+          item.def+
+          item.hp*.1+
+          item.mp*.1+
+          item.crit*2
+        )*3+
+        item.level*30
+      )
+    );
+
+
+  player.gold+=price;
+
+  player.inventory.splice(index,1);
+
+  player.selectedItem=null;
+
+  log(
+    "💰 "+
+    item.name+
+    "を"+
+    price+
+    "Gで売却"
+  );
+
+  save();
+  render();
+
+}
+
+
+/* =========================================================
+   街
+========================================================= */
+
+function townPage(){
+
+  return `
+
+  <div class="card center">
+
+    <div class="big">🏘️</div>
+
+    <h2>灰燼の街</h2>
+
+    <div class="small">
+      冒険者たちが集うあなたの拠点。
+    </div>
+
+  </div>
+
+
+  <div class="row">
+
+    <button onclick="stayHotel()">
+      🏨 宿屋
+      <br>
+      <span class="small">
+        全回復・経験値バフ
+      </span>
+    </button>
+
+    <button onclick="changeTab('equipment')">
+      🎒 装備
+      <br>
+      <span class="small">
+        装備を管理
+      </span>
+    </button>
+
+    <button onclick="changeTab('job')">
+      🏛️ 転職所
+      <br>
+      <span class="small">
+        職業を変更
+      </span>
+    </button>
+
+    <button onclick="changeTab('guild')">
+      📜 ギルド
+      <br>
+      <span class="small">
+        依頼・報酬
+      </span>
+    </button>
+
+  </div>
+
+
+  <button
+    class="green"
+    onclick="changeTab('dungeon')"
+  >
+    🏰 ダンジョンへ出発
+  </button>
+
+  `;
+
+}
+
+
+/* =========================================================
+   ダンジョン
+========================================================= */
+
+function dungeonPage(){
+
+  if(!player.enemy){
+
+    return `
+
+    <div class="card center">
+
+      <div class="big">🏰</div>
+
+      <h2>
+        第${player.floor}階
+      </h2>
+
+      <div class="small">
+        最高到達階：${player.highest}
+      </div>
+
+      <button
+        class="green"
+        onclick="spawnEnemy();render()"
+      >
+        🔎 探索開始
+      </button>
+
+    </div>
+
+    `;
+
+  }
+
+
+  const enemy=player.enemy;
+
+
+  return `
+
+  <div class="card enemy">
+
+    <div class="small">
+
+      ${
+        enemy.boss
+        ?"👑 BOSS"
+        :
+        enemy.elite
+        ?"💜 ELITE"
+        :
+        "ENEMY"
+      }
+
+    </div>
+
+    <div class="enemy-icon">
+      ${
+        enemy.boss
+        ?"👑"
+        :
+        enemy.elite
+        ?"💜"
+        :
+        "👹"
+      }
+    </div>
+
+    <h2>
+      ${enemy.name}
+    </h2>
+
+    <div class="bar">
+
+      <div
+        class="fill hp"
+        style="
+          width:${Math.max(
+            0,
+            enemy.hp
+          )/enemy.maxHp*100}%
+        "
+      ></div>
+
+    </div>
+
+    <div class="small">
+      HP ${Math.max(0,enemy.hp)}
+      /
+      ${enemy.maxHp}
+    </div>
+
+    <div class="small">
+      攻撃 ${enemy.atk}
+      /
+      防御 ${enemy.def}
+    </div>
+
+  </div>
+
+
+  <div class="card">
+
+    <div class="row">
+
+      <button onclick="normalAttack()">
+        ⚔️ 攻撃
+      </button>
+
+      <button onclick="useSkill()">
+        ✨ ${JOBS[player.job].skill}
+      </button>
+
+    </div>
+
+    <button onclick="usePotion()">
+      🧪 ポーション
+      (${player.pots})
+    </button>
+
+  </div>
+
+  `;
+
+}
+
+
+/* =========================================================
+   育成
+========================================================= */
+
+function growthPage(){
+
+  return `
+
+  <div class="card">
+
+    <h2>📊 育成</h2>
+
+    <div class="small">
+      未使用ステータスポイント：
+      ${player.points}
+    </div>
+
+    <div class="row">
+
+      <button onclick="spendPoint('atk')">
+        ⚔️ 攻撃 +1
+      </button>
+
+      <button onclick="spendPoint('def')">
+        🛡️ 防御 +1
+      </button>
+
+      <button onclick="spendPoint('hp')">
+        ❤️ HP +10
+      </button>
+
+      <button onclick="spendPoint('mp')">
+        🔮 MP +5
+      </button>
+
+      <button onclick="spendPoint('crit')">
+        🎯 会心 +1%
+      </button>
+
+    </div>
+
+  </div>
+
+
+  <div class="card">
+
+    <h3>📈 ステータス</h3>
+
+    <div class="row3">
+
+      <div class="stat">
+        <small>Lv</small>
+        <b>${player.level}</b>
+      </div>
+
+      <div class="stat">
+        <small>攻撃</small>
+        <b>${player.atk}</b>
+      </div>
+
+      <div class="stat">
+        <small>防御</small>
+        <b>${player.def}</b>
+      </div>
+
+    </div>
+
+    <div class="row3">
+
+      <div class="stat">
+        <small>HP</small>
+        <b>${player.maxHp}</b>
+      </div>
+
+      <div class="stat">
+        <small>MP</small>
+        <b>${player.maxMp}</b>
+      </div>
+
+      <div class="stat">
+        <small>会心</small>
+        <b>${player.crit}%</b>
+      </div>
+
+    </div>
+
+  </div>
+
+  `;
+
+}
+
+
+/* =========================================================
+   転職
+========================================================= */
+
+function jobPage(){
+
+  return `
+
+  <div class="card">
+
+    <h2>🏛️ 転職神殿</h2>
+
+    <div class="small">
+      条件を満たした職業へ転職できます。
+    </div>
+
+  </div>
+
+
+  ${
+    Object.entries(JOBS)
+    .map(([name,job])=>{
+
+      const available=
+        canChangeJob(name);
+
+      const current=
+        player.job===name;
+
+
+      return `
+
+      <div class="item ${
+        available?"":"locked"
+      }">
+
+        <div class="itemhead">
+
+          <b>${name}</b>
+
+          ${
+            current
+            ?
+            `<span class="good">
+              現在の職業
+            </span>`
+            :
+            ""
+          }
+
+        </div>
+
+        <div class="small">
+
+          必要Lv：
+          ${job.req}
+
+          ${
+            job.from.length
+            ?
+            " / 前職："+job.from.join("・")
+            :
+            ""
+          }
+
+        </div>
+
+        <div class="small">
+
+          HP ${job.hp}
+          /
+          MP ${job.mp}
+          /
+          攻 ${job.atk}
+          /
+          防 ${job.def}
+          /
+          会心 ${job.crit}%
+
+        </div>
+
+        <div class="tag">
+          ✨ ${job.skill}
+        </div>
+
+
+        ${
+          !current
+          ?
+          `
+          <button
+            ${
+              available
+              ?""
+              :"disabled"
+            }
+            onclick="applyJob('${name}')"
+          >
+            ${
+              available
+              ?"転職する"
+              :"条件未達"
+            }
+          </button>
+          `
+          :
+          ""
+        }
+
+      </div>
+
+      `;
+
+    })
+    .join("")
+  }
+
+  `;
+
+}
+
+
+/* =========================================================
+   ギルド
+========================================================= */
+
+function guildPage(){
+
+  const killDone=
+    player.quests.kills>=10;
+
+  const forgeDone=
+    player.quests.forge>=3;
+
+
+  return `
+
+  <div class="card">
+
+    <h2>📜 冒険者ギルド</h2>
+
+    <div class="small">
+      依頼を達成して報酬を獲得しよう。
+    </div>
+
+  </div>
+
+
+  <div class="card">
+
+    <h3>⚔️ 討伐依頼</h3>
+
+    <div>
+      敵を10体倒す
+    </div>
+
+    <div class="small">
+      ${Math.min(
+        10,
+        player.quests.kills
+      )}/10
+    </div>
+
+    <button
+      ${
+        killDone
+        ?""
+        :"disabled"
+      }
+      onclick="
+        player.gold+=300;
+        player.quests.kills=0;
+        log('📜 討伐報酬300G獲得！');
+        save();
+        render();
+      "
+    >
+      報酬 300G
+    </button>
+
+  </div>
+
+
+  <div class="card">
+
+    <h3>🔨 鍛冶依頼</h3>
+
+    <div>
+      装備を3回強化する
+    </div>
+
+    <div class="small">
+      ${Math.min(
+        3,
+        player.quests.forge
+      )}/3
+    </div>
+
+    <button
+      ${
+        forgeDone
+        ?""
+        :"disabled"
+      }
+      onclick="
+        player.gold+=500;
+        player.quests.forge=0;
+        log('📜 鍛冶報酬500G獲得！');
+        save();
+        render();
+      "
+    >
+      報酬 500G
+    </button>
+
+  </div>
+
+  `;
+
+}
+
+
+/* =========================================================
+   ログ
+========================================================= */
+
+function logsPage(){
+
+  return `
+
+  <div class="card">
+
+    <h3>📜 冒険ログ</h3>
+
+    <div class="log">
+
+      ${
+        player.logs
+        .map(
+          x=>`<div>${x}</div>`
+        )
+        .join("")
+      }
+
+    </div>
+
+  </div>
+
+  `;
+
+}
+
+
+/* =========================================================
+   リセット
+========================================================= */
+
+function resetGame(){
+
+  if(
+    confirm(
+      "本当に最初からやり直しますか？"
+    )
+  ){
+
+    localStorage.removeItem(SAVE_KEY);
+
+    location.reload();
+
+  }
+
+}
+
+
+/* =========================================================
+   メインUI
+========================================================= */
+
+function topStatus(){
+
+  const hpPercent=
+    player.maxHp
+    ?
+    player.hp/player.maxHp*100
+    :
+    0;
+
+  const mpPercent=
+    player.maxMp
+    ?
+    player.mp/player.maxMp*100
+    :
+    0;
+
+  const xpPercent=
+    player.xp/xpRequired()*100;
+
+
+  return `
+
+  <div class="card">
+
+    <div class="itemhead">
+
+      <b>
+        Lv.${player.level}
+        ${player.job}
+      </b>
+
+      <b>
+        💰 ${player.gold}G
+      </b>
+
+    </div>
+
+    <div class="small">
+      第${player.floor}階
+      /
+      最高${player.highest}階
+    </div>
+
+
+    <div>
+      ❤️ ${player.hp}/${player.maxHp}
+    </div>
+
+    <div class="bar">
+      <div
+        class="fill hp"
+        style="width:${hpPercent}%"
+      ></div>
+    </div>
+
+
+    <div>
+      🔮 ${player.mp}/${player.maxMp}
+    </div>
+
+    <div class="bar">
+      <div
+        class="fill mp"
+        style="width:${mpPercent}%"
+      ></div>
+    </div>
+
+
+    <div>
+      ⭐ XP ${player.xp}/${xpRequired()}
+    </div>
+
+    <div class="bar">
+      <div
+        class="fill xp"
+        style="width:${xpPercent}%"
+      ></div>
+    </div>
+
+
+    <div class="row3">
+
+      <div class="stat">
+        <small>攻撃</small>
+        <b>${player.atk}</b>
+      </div>
+
+      <div class="stat">
+        <small>防御</small>
+        <b>${player.def}</b>
+      </div>
+
+      <div class="stat">
+        <small>会心</small>
+        <b>${player.crit}%</b>
+      </div>
+
+    </div>
+
+  </div>
+
+  `;
+
+}
+
+
+function navigation(){
+
+  return `
+
+  <div class="tabs">
+
+    <button onclick="changeTab('town')">
+      🏘️街
+    </button>
+
+    <button onclick="changeTab('dungeon')">
+      ⚔️冒険
+    </button>
+
+    <button onclick="changeTab('equipment')">
+      🎒装備
+    </button>
+
+    <button onclick="changeTab('job')">
+      🏛️職業
+    </button>
+
+    <button onclick="changeTab('growth')">
+      📊育成
+    </button>
+
+    <button onclick="changeTab('guild')">
+      📜ギルド
+    </button>
+
+  </div>
+
+  `;
+
+}
+
+
+/* =========================================================
+   レンダリング
+========================================================= */
+
+function render(){
+
+  const app=
+    document.getElementById("app");
+
+
+  if(!player.job){
+
+    app.innerHTML=`
+
+      <div class="card center">
+
+        <div class="big">
+          🔥
+        </div>
+
+        <h1>
+          灰燼のクロニクル
+        </h1>
+
+        <p class="sub">
+          街から始まり、
+          転職と装備強化を重ね、
+          深淵の最深部を目指す育成RPG。
+        </p>
+
+        <h3>
+          最初の職業を選択
+        </h3>
+
+        ${
+          [
+            "戦士",
+            "魔法使い",
+            "盗賊",
+            "僧侶",
+            "弓使い",
+            "商人"
+          ]
+          .map(
+            x=>
+            `
+            <button
+              onclick="
+                chooseFirstJob('${x}')
+              "
+            >
+              ${x}
+            </button>
+            `
+          )
+          .join("")
+        }
+
+      </div>
+
+    `;
+
+    return;
+
+  }
+
+
+  let page="";
+
+
+  if(player.tab==="town")
+    page=townPage();
+
+  if(player.tab==="dungeon")
+    page=dungeonPage();
+
+  if(player.tab==="equipment")
+    page=equipmentPage();
+
+  if(player.tab==="job")
+    page=jobPage();
+
+  if(player.tab==="growth")
+    page=growthPage();
+
+  if(player.tab==="guild")
+    page=guildPage();
+
+
+  app.innerHTML=`
+
+    <h1>
+      🔥 灰燼のクロニクル
+    </h1>
+
+    <div class="sub">
+      街を育て、装備を集め、
+      転職を重ねて最強を目指せ。
+    </div>
+
+    ${topStatus()}
+
+    ${navigation()}
+
+    ${page}
+
+    ${logsPage()}
+
+    <div class="card">
+
+      <button
+        class="red"
+        onclick="resetGame()"
+      >
+        データをリセット
+      </button>
+
+    </div>
+
+  `;
+
+}
+
+
+/* =========================================================
+   起動
+========================================================= */
+
+render();
+
+</script>
+
+</body>
+</html>
