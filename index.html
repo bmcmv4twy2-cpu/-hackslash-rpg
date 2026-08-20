@@ -2,29 +2,2368 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
 <title>深淵の継承者</title>
+
+<style>
+*{
+    box-sizing:border-box;
+    -webkit-tap-highlight-color:transparent;
+}
+
+body{
+    margin:0;
+    background:
+        radial-gradient(circle at top,#252b45 0,#111522 42%,#090b12 100%);
+    color:#f3f4f8;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+}
+
+button{
+    border:0;
+    border-radius:12px;
+    padding:13px 10px;
+    color:white;
+    background:#6254d9;
+    font-size:15px;
+    font-weight:bold;
+    cursor:pointer;
+}
+
+button:active{
+    transform:scale(.97);
+}
+
+button:disabled{
+    opacity:.35;
+}
+
+.container{
+    max-width:720px;
+    margin:auto;
+    padding:12px 10px 35px;
+}
+
+header{
+    padding:12px 4px 8px;
+}
+
+h1{
+    margin:0;
+    font-size:25px;
+}
+
+.subtitle{
+    color:#9da4b8;
+    font-size:12px;
+    margin-top:4px;
+}
+
+.card{
+    background:rgba(22,26,40,.94);
+    border:1px solid #30364c;
+    border-radius:16px;
+    padding:13px;
+    margin:9px 0;
+    box-shadow:0 8px 25px rgba(0,0,0,.15);
+}
+
+.title{
+    font-weight:bold;
+    margin-bottom:8px;
+}
+
+.grid2{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:8px;
+}
+
+.grid3{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:7px;
+}
+
+.grid4{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:6px;
+}
+
+.stat{
+    background:#0d1019;
+    border-radius:10px;
+    padding:8px 4px;
+    text-align:center;
+}
+
+.stat small{
+    color:#9299ad;
+    display:block;
+}
+
+.stat b{
+    font-size:17px;
+}
+
+.bar{
+    height:12px;
+    background:#080a10;
+    border-radius:10px;
+    overflow:hidden;
+    margin:6px 0;
+}
+
+.barInner{
+    height:100%;
+    transition:.25s;
+}
+
+.hp{
+    background:#e64c5b;
+}
+
+.mp{
+    background:#5279ed;
+}
+
+.xp{
+    background:#9a5be9;
+}
+
+.enemyBox{
+    text-align:center;
+    padding:15px 8px;
+}
+
+.enemyIcon{
+    font-size:55px;
+}
+
+.enemyName{
+    font-size:20px;
+    font-weight:bold;
+    margin:5px;
+}
+
+.boss{
+    color:#ff6f79;
+}
+
+.elite{
+    color:#c77cff;
+}
+
+.log{
+    max-height:180px;
+    overflow-y:auto;
+    font-size:12px;
+    color:#c4cada;
+}
+
+.log div{
+    padding:3px 0;
+    border-bottom:1px solid #202536;
+}
+
+.item{
+    background:#0d1019;
+    border-radius:12px;
+    padding:9px;
+    margin:7px 0;
+    display:flex;
+    justify-content:space-between;
+    gap:8px;
+    align-items:center;
+}
+
+.itemInfo{
+    min-width:0;
+}
+
+.itemName{
+    font-weight:bold;
+}
+
+.itemStats{
+    color:#aeb5c8;
+    font-size:11px;
+    margin-top:3px;
+}
+
+.itemActions{
+    display:flex;
+    flex-direction:column;
+    gap:5px;
+    min-width:70px;
+}
+
+.itemActions button{
+    padding:7px;
+    font-size:12px;
+}
+
+.common{
+    color:#d9dce5;
+}
+
+.magic{
+    color:#59a5ff;
+}
+
+.rare{
+    color:#f0c74f;
+}
+
+.epic{
+    color:#d76cff;
+}
+
+.legendary{
+    color:#ff8748;
+}
+
+.mythic{
+    color:#ff4fa3;
+}
+
+.skill{
+    background:#0d1019;
+    border:1px solid #30364b;
+    border-radius:12px;
+    padding:9px;
+    margin:6px 0;
+}
+
+.skillTitle{
+    font-weight:bold;
+}
+
+.skillDesc{
+    font-size:11px;
+    color:#aab1c4;
+    margin:4px 0;
+}
+
+.shopItem{
+    background:#0d1019;
+    border-radius:12px;
+    padding:9px;
+    margin:7px 0;
+}
+
+.notice{
+    padding:10px;
+    background:#151b2c;
+    border-radius:10px;
+    color:#cbd1e2;
+    font-size:12px;
+}
+
+.danger{
+    background:#722c38;
+}
+
+.good{
+    background:#28664e;
+}
+
+.gold{
+    color:#ffd35b;
+}
+
+.center{
+    text-align:center;
+}
+
+.small{
+    font-size:11px;
+    color:#969daf;
+}
+
+.hidden{
+    display:none;
+}
+
+hr{
+    border:0;
+    border-top:1px solid #2b3042;
+    margin:10px 0;
+}
+
+@media(max-width:420px){
+    button{
+        font-size:13px;
+    }
+
+    .grid4{
+        grid-template-columns:repeat(2,1fr);
+    }
+}
+</style>
 </head>
 
 <body>
 
+<div class="container">
+
+<header>
 <h1>⚔️ 深淵の継承者</h1>
+<div class="subtitle">無限に続くダンジョンを攻略せよ</div>
+</header>
 
-<h2>ハクスラRPG</h2>
+<div id="game"></div>
 
-<p>冒険者 Lv.1</p>
-
-<p>HP：100 / 100</p>
-
-<button onclick="attack()">⚔️ 攻撃する</button>
-
-<p id="result">敵が現れた！</p>
+</div>
 
 <script>
-function attack() {
-    document.getElementById("result").textContent =
-        "⚔️ 敵に10ダメージ！";
+
+/* =========================================================
+   基本データ
+========================================================= */
+
+const SAVE_KEY = "abyss_rpg_v2";
+
+const RARITIES = [
+    {
+        id:"common",
+        name:"コモン",
+        chance:52,
+        mult:1
+    },
+    {
+        id:"magic",
+        name:"マジック",
+        chance:27,
+        mult:1.25
+    },
+    {
+        id:"rare",
+        name:"レア",
+        chance:13,
+        mult:1.65
+    },
+    {
+        id:"epic",
+        name:"エピック",
+        chance:6,
+        mult:2.15
+    },
+    {
+        id:"legendary",
+        name:"レジェンダリー",
+        chance:1.8,
+        mult:3
+    },
+    {
+        id:"mythic",
+        name:"ミシック",
+        chance:.2,
+        mult:4.5
+    }
+];
+
+const CLASSES = {
+
+    warrior:{
+        name:"戦士",
+        icon:"⚔️",
+        description:"高HP・高防御。安定した近接戦闘が得意。",
+        hp:150,
+        mp:50,
+        atk:15,
+        def:8,
+        crit:5,
+        speed:5
+    },
+
+    mage:{
+        name:"魔法使い",
+        icon:"🔮",
+        description:"高MP・高火力。スキルで敵を一気に倒す。",
+        hp:95,
+        mp:120,
+        atk:19,
+        def:3,
+        crit:8,
+        speed:6
+    },
+
+    rogue:{
+        name:"盗賊",
+        icon:"🗡️",
+        description:"高クリティカル・高速度。運が良ければ爆発的火力。",
+        hp:110,
+        mp:70,
+        atk:14,
+        def:5,
+        crit:18,
+        speed:12
+    }
+};
+
+const ENEMIES = [
+    ["スライム","🟢",.75],
+    ["ゴブリン","👺",.9],
+    ["骸骨兵","💀",1],
+    ["闇狼","🐺",1.15],
+    ["オーク","👹",1.35],
+    ["呪術師","🧙",1.5],
+    ["ミノタウロス","🐂",1.8],
+    ["深淵騎士","🛡️",2.1],
+    ["魔獣","🐉",2.5]
+];
+
+const ITEM_TYPES = [
+    {
+        type:"weapon",
+        names:["古びた剣","鉄の剣","騎士の剣","魔剣","深淵の刃"],
+        icon:"⚔️"
+    },
+    {
+        type:"armor",
+        names:["布の服","革鎧","鉄鎧","騎士鎧","深淵鎧"],
+        icon:"🛡️"
+    },
+    {
+        type:"accessory",
+        names:["古い指輪","力の指輪","魔力の指輪","幸運の指輪","深淵の指輪"],
+        icon:"💍"
+    }
+];
+
+const SKILLS = {
+
+    warrior:[
+        {
+            id:"power",
+            name:"💥 パワースラッシュ",
+            cost:20,
+            desc:"通常攻撃の2.2倍ダメージ",
+            effect:"damage",
+            mult:2.2
+        },
+        {
+            id:"guard",
+            name:"🛡️ 鉄壁",
+            cost:25,
+            desc:"3ターンの間、防御力+50%",
+            effect:"guard"
+        },
+        {
+            id:"rage",
+            name:"🔥 バーサーク",
+            cost:40,
+            desc:"HP30%以下なら攻撃力2倍",
+            effect:"rage"
+        }
+    ],
+
+    mage:[
+        {
+            id:"fire",
+            name:"🔥 ファイアボール",
+            cost:20,
+            desc:"通常攻撃の2.8倍ダメージ",
+            effect:"damage",
+            mult:2.8
+        },
+        {
+            id:"meteor",
+            name:"☄️ メテオ",
+            cost:45,
+            desc:"通常攻撃の5倍ダメージ",
+            effect:"damage",
+            mult:5
+        },
+        {
+            id:"heal",
+            name:"💚 ヒール",
+            cost:30,
+            desc:"HPを最大HPの35%回復",
+            effect:"heal"
+        }
+    ],
+
+    rogue:[
+        {
+            id:"double",
+            name:"🗡️ 二連撃",
+            cost:20,
+            desc:"2回攻撃する",
+            effect:"double"
+        },
+        {
+            id:"assassinate",
+            name:"💀 暗殺",
+            cost:40,
+            desc:"クリティカル率+50%で攻撃",
+            effect:"assassinate"
+        },
+        {
+            id:"steal",
+            name:"💰 スティール",
+            cost:15,
+            desc:"敵から追加ゴールドを奪う",
+            effect:"steal"
+        }
+    ]
+};
+
+/* =========================================================
+   ユーティリティ
+========================================================= */
+
+function rand(min,max){
+    return Math.floor(Math.random()*(max-min+1))+min;
 }
+
+function randomFloat(min,max){
+    return Math.random()*(max-min)+min;
+}
+
+function uid(){
+    return Date.now()+"_"+Math.random().toString(36).slice(2);
+}
+
+function choose(array){
+    return array[Math.floor(Math.random()*array.length)];
+}
+
+function rarityRoll(){
+
+    let roll=Math.random()*100;
+    let total=0;
+
+    for(const r of RARITIES){
+
+        total+=r.chance;
+
+        if(roll<=total){
+            return r;
+        }
+    }
+
+    return RARITIES[0];
+}
+
+/* =========================================================
+   セーブ
+========================================================= */
+
+function save(){
+
+    localStorage.setItem(
+        SAVE_KEY,
+        JSON.stringify(player)
+    );
+}
+
+function load(){
+
+    try{
+
+        const data=localStorage.getItem(SAVE_KEY);
+
+        if(data){
+            return JSON.parse(data);
+        }
+
+    }catch(e){}
+
+    return null;
+}
+
+/* =========================================================
+   プレイヤー
+========================================================= */
+
+let player=load();
+
+if(!player){
+
+    player={
+        classId:null,
+
+        level:1,
+        xp:0,
+
+        floor:1,
+
+        gold:100,
+
+        hp:0,
+        maxHp:0,
+
+        mp:0,
+        maxMp:0,
+
+        atk:0,
+        def:0,
+        crit:0,
+        speed:0,
+
+        bonusAtk:0,
+        bonusDef:0,
+        bonusCrit:0,
+        bonusHp:0,
+        bonusMp:0,
+
+        points:0,
+
+        potions:3,
+
+        inventory:[],
+        equipped:{
+            weapon:null,
+            armor:null,
+            accessory:null
+        },
+
+        enemy:null,
+
+        turn:0,
+
+        logs:[
+            "深淵への冒険が始まった！"
+        ],
+
+        temporary:{
+            guard:0,
+            rage:false
+        },
+
+        totalKills:0,
+        totalDeaths:0,
+        bosses:0,
+        highestFloor:1,
+
+        shop:[],
+        shopTimer:0
+    };
+}
+
+/* =========================================================
+   職業選択
+========================================================= */
+
+function selectClass(id){
+
+    const c=CLASSES[id];
+
+    player.classId=id;
+
+    player.maxHp=c.hp;
+    player.hp=c.hp;
+
+    player.maxMp=c.mp;
+    player.mp=c.mp;
+
+    player.atk=c.atk;
+    player.def=c.def;
+    player.crit=c.crit;
+    player.speed=c.speed;
+
+    player.enemy=null;
+
+    log("職業を「"+c.name+"」に決めた！");
+    save();
+
+    spawnEnemy();
+    render();
+}
+
+/* =========================================================
+   経験値
+========================================================= */
+
+function requiredXP(){
+
+    return Math.floor(
+        100*
+        Math.pow(player.level,1.35)
+    );
+}
+
+function gainXP(amount){
+
+    player.xp+=amount;
+
+    while(player.xp>=requiredXP()){
+
+        player.xp-=requiredXP();
+
+        player.level++;
+
+        player.points+=3;
+
+        player.maxHp+=10;
+        player.maxMp+=5;
+
+        player.hp=player.maxHp;
+        player.mp=player.maxMp;
+
+        player.atk+=2;
+        player.def+=1;
+
+        log("🎉 レベルアップ！ Lv."+player.level);
+        log("📈 ステータスポイントを3獲得！");
+    }
+}
+
+/* =========================================================
+   装備
+========================================================= */
+
+function createItem(){
+
+    const rarity=rarityRoll();
+
+    const type=choose(ITEM_TYPES);
+
+    const baseIndex=Math.min(
+        type.names.length-1,
+        Math.floor(player.floor/20)
+    );
+
+    const base=rand(4,9);
+
+    const scale=
+        rarity.mult*
+        (1+player.floor*.025);
+
+    const item={
+        id:uid(),
+
+        type:type.type,
+
+        icon:type.icon,
+
+        name:type.names[baseIndex],
+
+        rarity:rarity.id,
+
+        rarityName:rarity.name,
+
+        atk:0,
+        def:0,
+        crit:0,
+        hp:0,
+        mp:0,
+        gold:0
+    };
+
+    if(type.type==="weapon"){
+
+        item.atk=Math.max(
+            1,
+            Math.floor(base*scale)
+        );
+
+    }
+
+    if(type.type==="armor"){
+
+        item.def=Math.max(
+            1,
+            Math.floor(base*.75*scale)
+        );
+
+        item.hp=Math.floor(
+            base*3*scale
+        );
+    }
+
+    if(type.type==="accessory"){
+
+        item.crit=Math.max(
+            1,
+            Math.floor(base*.8*scale)
+        );
+
+        item.mp=Math.floor(
+            base*2*scale
+        );
+    }
+
+    /* ランダム追加能力 */
+
+    const affixes=
+        rarity.id==="common" ? 0 :
+        rarity.id==="magic" ? 1 :
+        rarity.id==="rare" ? 2 :
+        rarity.id==="epic" ? 3 :
+        rarity.id==="legendary" ? 4 :
+        5;
+
+    for(let i=0;i<affixes;i++){
+
+        const a=choose([
+            "atk",
+            "def",
+            "crit",
+            "hp",
+            "mp"
+        ]);
+
+        const value=rand(
+            1,
+            Math.max(
+                2,
+                Math.floor(player.floor*.35)
+            )
+        );
+
+        item[a]+=value;
+    }
+
+    item.score=
+        item.atk+
+        item.def*1.5+
+        item.crit*2+
+        item.hp*.08+
+        item.mp*.1;
+
+    return item;
+}
+
+function equipItem(id){
+
+    const item=player.inventory.find(
+        x=>x.id===id
+    );
+
+    if(!item) return;
+
+    const old=player.equipped[item.type];
+
+    if(old){
+
+        player.atk-=old.atk;
+        player.def-=old.def;
+        player.crit-=old.crit;
+        player.bonusHp-=old.hp;
+        player.bonusMp-=old.mp;
+    }
+
+    player.equipped[item.type]=item;
+
+    player.atk+=item.atk;
+    player.def+=item.def;
+    player.crit+=item.crit;
+    player.bonusHp+=item.hp;
+    player.bonusMp+=item.mp;
+
+    player.maxHp+=item.hp;
+    player.maxMp+=item.mp;
+
+    player.hp=Math.min(
+        player.hp,
+        player.maxHp
+    );
+
+    player.mp=Math.min(
+        player.mp,
+        player.maxMp
+    );
+
+    log(
+        "🛡️ "+
+        item.rarityName+
+        "「"+item.name+"」を装備した！"
+    );
+
+    save();
+    render();
+}
+
+function sellItem(id){
+
+    const index=player.inventory.findIndex(
+        x=>x.id===id
+    );
+
+    if(index<0)return;
+
+    const item=player.inventory[index];
+
+    if(
+        player.equipped[item.type] &&
+        player.equipped[item.type].id===item.id
+    ){
+
+        log("装備中のアイテムは売れません！");
+        render();
+        return;
+    }
+
+    const price=
+        Math.max(
+            5,
+            Math.floor(
+                item.score*
+                (2+item.rarity.length)
+            )
+        );
+
+    player.gold+=price;
+
+    player.inventory.splice(index,1);
+
+    log(
+        "💰 "+
+        item.name+
+        "を"+price+"Gで売却した！"
+    );
+
+    save();
+    render();
+}
+
+/* =========================================================
+   敵生成
+========================================================= */
+
+function spawnEnemy(){
+
+    if(!player.classId)return;
+
+    const floor=player.floor;
+
+    const boss=floor%10===0;
+
+    const elite=!boss &&
+        Math.random()<
+        Math.min(.25,.08+floor*.002);
+
+    const data=choose(ENEMIES);
+
+    const scale=
+        1+
+        floor*.11+
+        Math.pow(floor,1.18)*.015;
+
+    let hp=
+        Math.floor(
+            65*
+            data[2]*
+            scale+
+            player.level*12
+        );
+
+    let atk=
+        Math.floor(
+            7*
+            data[2]*
+            scale+
+            floor*.7
+        );
+
+    let def=
+        Math.floor(
+            floor*.25
+        );
+
+    if(elite){
+
+        hp=Math.floor(hp*1.8);
+        atk=Math.floor(atk*1.45);
+        def+=Math.floor(floor*.5);
+    }
+
+    if(boss){
+
+        hp=Math.floor(hp*4.5);
+        atk=Math.floor(atk*1.7);
+        def+=Math.floor(floor*.8);
+    }
+
+    player.enemy={
+
+        name:data[0],
+
+        icon:data[1],
+
+        hp:hp,
+
+        maxHp:hp,
+
+        atk:atk,
+
+        def:def,
+
+        boss:boss,
+
+        elite:elite
+    };
+
+    log(
+        boss
+        ?"👑 BOSS「"+data[0]+"」出現！"
+        :elite
+        ?"💜 エリート「"+data[0]+"」出現！"
+        :"👹 "+data[0]+"が現れた！"
+    );
+
+    save();
+}
+
+/* =========================================================
+   ダメージ
+========================================================= */
+
+function calculateDamage(mult=1,critBonus=0){
+
+    let critChance=
+        player.crit+
+        critBonus;
+
+    let critical=
+        Math.random()*100<critChance;
+
+    let attack=
+        player.atk+
+        rand(0,Math.max(2,player.level));
+
+    if(
+        player.temporary.rage &&
+        player.hp/player.maxHp<=.3
+    ){
+
+        attack*=2;
+    }
+
+    let damage=
+        Math.floor(
+            attack*
+            mult*
+            (critical?2:1)
+        );
+
+    damage=Math.max(
+        1,
+        damage-player.enemy.def
+    );
+
+    return {
+        damage,
+        critical
+    };
+}
+
+/* =========================================================
+   通常攻撃
+========================================================= */
+
+function attack(){
+
+    if(!player.enemy){
+
+        spawnEnemy();
+        render();
+        return;
+    }
+
+    player.turn++;
+
+    const result=
+        calculateDamage();
+
+    player.enemy.hp-=result.damage;
+
+    log(
+        "⚔️ "+
+        result.damage+
+        "ダメージ"+
+        (result.critical?" 🔥CRITICAL!":"")
+    );
+
+    if(player.enemy.hp<=0){
+
+        victory();
+
+    }else{
+
+        enemyTurn();
+    }
+
+    save();
+    render();
+}
+
+/* =========================================================
+   スキル
+========================================================= */
+
+function useSkill(id){
+
+    if(!player.enemy)return;
+
+    const skill=SKILLS[player.classId]
+        .find(x=>x.id===id);
+
+    if(!skill)return;
+
+    if(player.mp<skill.cost){
+
+        log("✨ MPが足りない！");
+        render();
+        return;
+    }
+
+    player.mp-=skill.cost;
+
+    player.turn++;
+
+    if(skill.effect==="damage"){
+
+        const result=
+            calculateDamage(skill.mult);
+
+        player.enemy.hp-=result.damage;
+
+        log(
+            skill.name+
+            " → "+
+            result.damage+
+            "ダメージ！"
+        );
+    }
+
+    if(skill.effect==="guard"){
+
+        player.temporary.guard=3;
+
+        log(
+            "🛡️ 防御力が3ターン強化された！"
+        );
+    }
+
+    if(skill.effect==="rage"){
+
+        player.temporary.rage=true;
+
+        log(
+            "🔥 バーサーク状態になった！"
+        );
+    }
+
+    if(skill.effect==="heal"){
+
+        const heal=
+            Math.floor(
+                player.maxHp*.35
+            );
+
+        player.hp=
+            Math.min(
+                player.maxHp,
+                player.hp+heal
+            );
+
+        log(
+            "💚 "+heal+
+            "HP回復！"
+        );
+    }
+
+    if(skill.effect==="double"){
+
+        for(let i=0;i<2;i++){
+
+            const result=
+                calculateDamage();
+
+            player.enemy.hp-=result.damage;
+
+            log(
+                "🗡️ 二連撃 "+
+                result.damage+
+                "ダメージ"
+            );
+
+            if(player.enemy.hp<=0)break;
+        }
+    }
+
+    if(skill.effect==="assassinate"){
+
+        const result=
+            calculateDamage(
+                2,
+                50
+            );
+
+        player.enemy.hp-=result.damage;
+
+        log(
+            "💀 暗殺 "+
+            result.damage+
+            "ダメージ！"
+        );
+    }
+
+    if(skill.effect==="steal"){
+
+        const amount=
+            rand(
+                5,
+                15+
+                player.floor
+            );
+
+        player.gold+=amount;
+
+        log(
+            "💰 "+amount+
+            "Gを奪った！"
+        );
+    }
+
+    if(player.enemy.hp<=0){
+
+        victory();
+
+    }else{
+
+        enemyTurn();
+    }
+
+    save();
+    render();
+}
+
+/* =========================================================
+   敵ターン
+========================================================= */
+
+function enemyTurn(){
+
+    if(!player.enemy)return;
+
+    let defense=
+        player.def;
+
+    if(player.temporary.guard>0){
+
+        defense=
+            Math.floor(defense*1.5);
+
+        player.temporary.guard--;
+
+        if(player.temporary.guard===0){
+
+            log("🛡️ 鉄壁の効果が切れた");
+        }
+    }
+
+    let damage=
+        player.enemy.atk-
+        defense+
+        rand(0,4);
+
+    damage=Math.max(
+        1,
+        damage
+    );
+
+    player.hp-=damage;
+
+    log(
+        "💥 "+
+        damage+
+        "ダメージ受けた！"
+    );
+
+    if(player.hp<=0){
+
+        death();
+    }
+}
+
+/* =========================================================
+   勝利
+========================================================= */
+
+function victory(){
+
+    const enemy=player.enemy;
+
+    const baseXP=
+        25+
+        player.floor*7;
+
+    const xp=
+        Math.floor(
+            baseXP*
+            (enemy.boss?5:
+             enemy.elite?2:1)
+        );
+
+    const gold=
+        rand(
+            10,
+            20+
+            player.floor*3
+        )*
+        (enemy.boss?5:
+         enemy.elite?2:1);
+
+    player.gold+=gold;
+
+    gainXP(xp);
+
+    player.totalKills++;
+
+    if(enemy.boss){
+
+        player.bosses++;
+
+        log(
+            "👑 BOSS撃破！！"
+        );
+    }
+
+    let dropChance=
+        enemy.boss
+        ?1
+        :enemy.elite
+        ?.75
+        :.28;
+
+    if(Math.random()<dropChance){
+
+        const item=createItem();
+
+        player.inventory.unshift(item);
+
+        log(
+            "💎 "+
+            item.rarityName+
+            "「"+
+            item.name+
+            "」を入手！"
+        );
+
+        if(
+            !player.equipped[item.type] ||
+            item.score>
+            player.equipped[item.type].score
+        ){
+
+            log(
+                "✨ より強い装備かもしれない！"
+            );
+        }
+    }
+
+    log(
+        "🏆 "+xp+
+        "XP / "+gold+"G 獲得！"
+    );
+
+    player.hp=
+        Math.min(
+            player.maxHp,
+            player.hp+
+            Math.floor(player.maxHp*.08)
+        );
+
+    player.mp=
+        Math.min(
+            player.maxMp,
+            player.mp+
+            Math.floor(player.maxMp*.1)
+        );
+
+    player.enemy=null;
+
+    if(enemy.boss){
+
+        player.floor++;
+
+        player.highestFloor=
+            Math.max(
+                player.highestFloor,
+                player.floor
+            );
+
+        player.hp=player.maxHp;
+        player.mp=player.maxMp;
+
+        log(
+            "🏰 第"+player.floor+
+            "階層へ進んだ！"
+        );
+    }
+}
+
+/* =========================================================
+   死亡
+========================================================= */
+
+function death(){
+
+    player.totalDeaths++;
+
+    const loss=
+        Math.floor(
+            player.gold*.1
+        );
+
+    player.gold=
+        Math.max(
+            0,
+            player.gold-loss
+        );
+
+    player.hp=
+        Math.floor(
+            player.maxHp*.5
+        );
+
+    player.mp=
+        Math.floor(
+            player.maxMp*.5
+        );
+
+    player.enemy=null;
+
+    player.temporary={
+        guard:0,
+        rage:false
+    };
+
+    log(
+        "💀 力尽きた……"
+    );
+
+    log(
+        "💰 "+loss+
+        "Gを失った"
+    );
+
+    log(
+        "🔥 復活した！もう一度挑戦できる！"
+    );
+}
+
+/* =========================================================
+   ポーション
+========================================================= */
+
+function usePotion(){
+
+    if(player.potions<=0){
+
+        log("🧪 ポーションがない！");
+        render();
+        return;
+    }
+
+    player.potions--;
+
+    const heal=
+        Math.floor(
+            player.maxHp*.45
+        );
+
+    player.hp=
+        Math.min(
+            player.maxHp,
+            player.hp+heal
+        );
+
+    log(
+        "🧪 ポーション使用！ "+
+        heal+"HP回復"
+    );
+
+    save();
+    render();
+}
+
+/* =========================================================
+   次の敵
+========================================================= */
+
+function nextEnemy(){
+
+    if(player.enemy){
+
+        log("⚠️ まだ敵が残っている！");
+        render();
+        return;
+    }
+
+    spawnEnemy();
+
+    render();
+}
+
+/* =========================================================
+   ステータス振り
+========================================================= */
+
+function upgrade(stat){
+
+    if(player.points<=0){
+
+        log("📈 ポイントがない！");
+        render();
+        return;
+    }
+
+    player.points--;
+
+    if(stat==="atk"){
+
+        player.atk++;
+        player.bonusAtk++;
+    }
+
+    if(stat==="def"){
+
+        player.def++;
+        player.bonusDef++;
+    }
+
+    if(stat==="crit"){
+
+        player.crit++;
+        player.bonusCrit++;
+    }
+
+    if(stat==="hp"){
+
+        player.maxHp+=10;
+        player.hp+=10;
+        player.bonusHp+=10;
+    }
+
+    if(stat==="mp"){
+
+        player.maxMp+=5;
+        player.mp+=5;
+        player.bonusMp+=5;
+    }
+
+    save();
+    render();
+}
+
+/* =========================================================
+   ショップ
+========================================================= */
+
+function refreshShop(){
+
+    player.shop=[];
+
+    for(let i=0;i<5;i++){
+
+        player.shop.push({
+            id:uid(),
+            item:createItem(),
+            price:
+                rand(
+                    40,
+                    100+
+                    player.floor*8
+                )
+        });
+    }
+
+    player.shopTimer=Date.now();
+
+    save();
+}
+
+function buyShop(id){
+
+    const index=
+        player.shop.findIndex(
+            x=>x.id===id
+        );
+
+    if(index<0)return;
+
+    const shopItem=
+        player.shop[index];
+
+    if(player.gold<shopItem.price){
+
+        log("💰 お金が足りない！");
+        render();
+        return;
+    }
+
+    player.gold-=shopItem.price;
+
+    player.inventory.unshift(
+        shopItem.item
+    );
+
+    player.shop.splice(index,1);
+
+    log(
+        "🛒 "+
+        shopItem.item.name+
+        "を購入した！"
+    );
+
+    save();
+    render();
+}
+
+/* =========================================================
+   ログ
+========================================================= */
+
+function log(text){
+
+    player.logs.unshift(
+        "["+
+        new Date().toLocaleTimeString(
+            "ja-JP",
+            {
+                hour:"2-digit",
+                minute:"2-digit"
+            }
+        )+
+        "] "+
+        text
+    );
+
+    player.logs=
+        player.logs.slice(
+            0,
+            45
+        );
+}
+
+/* =========================================================
+   リセット
+========================================================= */
+
+function resetGame(){
+
+    if(
+        !confirm(
+            "本当に最初からやり直しますか？"
+        )
+    )return;
+
+    localStorage.removeItem(
+        SAVE_KEY
+    );
+
+    location.reload();
+}
+
+/* =========================================================
+   装備表示
+========================================================= */
+
+function itemStats(item){
+
+    const arr=[];
+
+    if(item.atk)
+        arr.push("⚔️+"+item.atk);
+
+    if(item.def)
+        arr.push("🛡️+"+item.def);
+
+    if(item.crit)
+        arr.push("🎯+"+item.crit+"%");
+
+    if(item.hp)
+        arr.push("❤️+"+item.hp);
+
+    if(item.mp)
+        arr.push("🔮+"+item.mp);
+
+    return arr.join("　");
+}
+
+function equipmentHTML(){
+
+    if(player.inventory.length===0){
+
+        return `
+        <div class="notice">
+        🎒 まだ装備を持っていません。
+        </div>
+        `;
+    }
+
+    return player.inventory
+        .slice(0,30)
+        .map(item=>{
+
+            const equipped=
+                player.equipped[item.type] &&
+                player.equipped[item.type].id===
+                item.id;
+
+            return `
+
+            <div class="item">
+
+                <div class="itemInfo">
+
+                    <div class="itemName ${item.rarity}">
+                        ${item.icon}
+                        ${item.rarityName}
+                        「${item.name}」
+                        ${equipped?"　✓装備中":""}
+                    </div>
+
+                    <div class="itemStats">
+                        ${itemStats(item)}
+                    </div>
+
+                </div>
+
+                <div class="itemActions">
+
+                    ${
+                        equipped
+                        ?
+                        `<button disabled>装備中</button>`
+                        :
+                        `<button onclick="equipItem('${item.id}')">
+                            装備
+                        </button>`
+                    }
+
+                    <button
+                        class="danger"
+                        onclick="sellItem('${item.id}')">
+                        売却
+                    </button>
+
+                </div>
+
+            </div>
+            `;
+        })
+        .join("");
+}
+
+/* =========================================================
+   スキル表示
+========================================================= */
+
+function skillsHTML(){
+
+    const skills=
+        SKILLS[player.classId] || [];
+
+    return skills.map(skill=>`
+
+        <div class="skill">
+
+            <div class="skillTitle">
+                ${skill.name}
+            </div>
+
+            <div class="skillDesc">
+                ${skill.desc}
+                ／ MP ${skill.cost}
+            </div>
+
+            <button
+                onclick="useSkill('${skill.id}')"
+                ${player.mp<skill.cost?"disabled":""}>
+
+                使用
+
+            </button>
+
+        </div>
+
+    `).join("");
+}
+
+/* =========================================================
+   ステータス表示
+========================================================= */
+
+function statsHTML(){
+
+    return `
+
+    <div class="grid4">
+
+        <div class="stat">
+            <small>⚔️ 攻撃</small>
+            <b>${player.atk}</b>
+        </div>
+
+        <div class="stat">
+            <small>🛡️ 防御</small>
+            <b>${player.def}</b>
+        </div>
+
+        <div class="stat">
+            <small>🎯 会心</small>
+            <b>${player.crit}%</b>
+        </div>
+
+        <div class="stat">
+            <small>💨 速度</small>
+            <b>${player.speed}</b>
+        </div>
+
+    </div>
+
+    <div class="grid2" style="margin-top:7px">
+
+        <div class="stat">
+            <small>🏆 撃破数</small>
+            <b>${player.totalKills}</b>
+        </div>
+
+        <div class="stat">
+            <small>👑 BOSS</small>
+            <b>${player.bosses}</b>
+        </div>
+
+    </div>
+
+    `;
+}
+
+/* =========================================================
+   ゲーム画面
+========================================================= */
+
+function render(){
+
+    const game=
+        document.getElementById("game");
+
+    /* 職業未選択 */
+
+    if(!player.classId){
+
+        game.innerHTML=`
+
+        <div class="card">
+
+            <div class="title">
+                🏰 冒険者を選択
+            </div>
+
+            <div class="notice">
+                深淵は無限に続いている。<br>
+                どの職業で挑む？
+            </div>
+
+            <div style="margin-top:10px">
+
+                ${Object.entries(CLASSES)
+                    .map(([id,c])=>`
+
+                    <div class="card">
+
+                        <div style="font-size:22px">
+                            ${c.icon}
+                            ${c.name}
+                        </div>
+
+                        <div class="small">
+                            ${c.description}
+                        </div>
+
+                        <hr>
+
+                        ❤️ HP ${c.hp}<br>
+                        🔮 MP ${c.mp}<br>
+                        ⚔️ 攻撃 ${c.atk}<br>
+                        🛡️ 防御 ${c.def}<br>
+                        🎯 会心 ${c.crit}%
+
+                        <br><br>
+
+                        <button
+                            onclick="selectClass('${id}')">
+
+                            ${c.name}で冒険開始
+
+                        </button>
+
+                    </div>
+
+                `).join("")}
+
+            </div>
+
+        </div>
+
+        `;
+
+        return;
+    }
+
+    const xpReq=
+        requiredXP();
+
+    const xpPercent=
+        Math.min(
+            100,
+            player.xp/xpReq*100
+        );
+
+    let enemyHTML="";
+
+    if(player.enemy){
+
+        const e=player.enemy;
+
+        enemyHTML=`
+
+        <div class="card enemyBox">
+
+            <div class="${
+                e.boss
+                ?"boss"
+                :e.elite
+                ?"elite"
+                :""
+            }">
+
+                ${
+                    e.boss
+                    ?"👑 BOSS"
+                    :e.elite
+                    ?"💜 ELITE"
+                    :"⚔️ ENEMY"
+                }
+
+            </div>
+
+            <div class="enemyIcon">
+                ${e.icon}
+            </div>
+
+            <div class="enemyName ${
+                e.boss
+                ?"boss"
+                :e.elite
+                ?"elite"
+                :""
+            }">
+
+                ${e.name}
+
+            </div>
+
+            <div class="bar">
+                <div
+                    class="barInner hp"
+                    style="
+                    width:${Math.max(
+                        0,
+                        e.hp/e.maxHp*100
+                    )}%;
+                    ">
+                </div>
+            </div>
+
+            <div class="small">
+                HP ${Math.max(0,e.hp)}
+                / ${e.maxHp}
+            </div>
+
+            <div class="small">
+                ⚔️ ${e.atk}
+                ／ 🛡️ ${e.def}
+            </div>
+
+        </div>
+
+        `;
+
+    }else{
+
+        enemyHTML=`
+
+        <div class="card center">
+
+            <div style="font-size:45px">
+                🏰
+            </div>
+
+            <div>
+                敵を倒した！
+            </div>
+
+            <button
+                onclick="nextEnemy()"
+                style="margin-top:8px">
+
+                🗺️ 次の敵を探す
+
+            </button>
+
+        </div>
+
+        `;
+    }
+
+    game.innerHTML=`
+
+    <!-- プレイヤー -->
+
+    <div class="card">
+
+        <div style="
+        display:flex;
+        justify-content:space-between;
+        align-items:center">
+
+            <div>
+
+                <b style="font-size:18px">
+
+                    ${CLASSES[player.classId].icon}
+                    ${CLASSES[player.classId].name}
+
+                </b>
+
+                <div class="small">
+                    Lv.${player.level}
+                    ／ 第${player.floor}階層
+                </div>
+
+            </div>
+
+            <div class="gold">
+                💰 ${player.gold}G
+            </div>
+
+        </div>
+
+        <hr>
+
+        ❤️ ${player.hp} / ${player.maxHp}
+
+        <div class="bar">
+            <div
+                class="barInner hp"
+                style="width:${
+                    player.hp/
+                    player.maxHp*
+                    100
+                }%">
+            </div>
+        </div>
+
+        🔮 ${player.mp} / ${player.maxMp}
+
+        <div class="bar">
+            <div
+                class="barInner mp"
+                style="width:${
+                    player.mp/
+                    player.maxMp*
+                    100
+                }%">
+            </div>
+        </div>
+
+        ⭐ XP ${player.xp} / ${xpReq}
+
+        <div class="bar">
+            <div
+                class="barInner xp"
+                style="width:${xpPercent}%">
+            </div>
+        </div>
+
+        ${statsHTML()}
+
+    </div>
+
+    <!-- 敵 -->
+
+    ${enemyHTML}
+
+    <!-- 戦闘 -->
+
+    <div class="card">
+
+        <div class="title">
+            ⚔️ 戦闘
+        </div>
+
+        <div class="grid2">
+
+            <button
+                onclick="attack()">
+
+                ⚔️ 通常攻撃
+
+            </button>
+
+            <button
+                onclick="usePotion()">
+
+                🧪 回復
+                (${player.potions})
+
+            </button>
+
+        </div>
+
+    </div>
+
+    <!-- スキル -->
+
+    <div class="card">
+
+        <div class="title">
+            ✨ スキル
+        </div>
+
+        ${skillsHTML()}
+
+    </div>
+
+    <!-- 育成 -->
+
+    <div class="card">
+
+        <div class="title">
+            📈 キャラクター育成
+        </div>
+
+        <div class="notice">
+            未使用ポイント：
+            <b>${player.points}</b>
+        </div>
+
+        <div class="grid2" style="margin-top:8px">
+
+            <button onclick="upgrade('atk')">
+                ⚔️ 攻撃 +1
+            </button>
+
+            <button onclick="upgrade('def')">
+                🛡️ 防御 +1
+            </button>
+
+            <button onclick="upgrade('crit')">
+                🎯 会心 +1%
+            </button>
+
+            <button onclick="upgrade('hp')">
+                ❤️ 最大HP +10
+            </button>
+
+            <button onclick="upgrade('mp')">
+                🔮 最大MP +5
+            </button>
+
+        </div>
+
+    </div>
+
+    <!-- 装備 -->
+
+    <div class="card">
+
+        <div class="title">
+            🎒 インベントリ
+        </div>
+
+        <div class="small">
+            最大30個表示 ／
+            装備を厳選して強くなろう
+        </div>
+
+        ${equipmentHTML()}
+
+    </div>
+
+    <!-- ショップ -->
+
+    <div class="card">
+
+        <div class="title">
+            🏪 深淵ショップ
+        </div>
+
+        <button
+            onclick="refreshShop()">
+
+            🔄 商品更新
+
+        </button>
+
+        ${
+            player.shop.length
+            ?
+            player.shop.map(s=>`
+
+                <div class="shopItem">
+
+                    <div class="${s.item.rarity}">
+
+                        <b>
+                            ${s.item.icon}
+                            ${s.item.rarityName}
+                            「${s.item.name}」
+                        </b>
+
+                    </div>
+
+                    <div class="itemStats">
+                        ${itemStats(s.item)}
+                    </div>
+
+                    <button
+                        onclick="buyShop('${s.id}')">
+
+                        💰 ${s.price}Gで購入
+
+                    </button>
+
+                </div>
+
+            `).join("")
+            :
+            `
+            <div class="notice" style="margin-top:8px">
+                商品がありません。
+                「商品更新」を押してください。
+            </div>
+            `
+        }
+
+    </div>
+
+    <!-- 実績 -->
+
+    <div class="card">
+
+        <div class="title">
+            🏆 冒険記録
+        </div>
+
+        <div class="grid2">
+
+            <div class="stat">
+                <small>最高到達階</small>
+                <b>${player.highestFloor}</b>
+            </div>
+
+            <div class="stat">
+                <small>撃破数</small>
+                <b>${player.totalKills}</b>
+            </div>
+
+            <div class="stat">
+                <small>ボス撃破</small>
+                <b>${player.bosses}</b>
+            </div>
+
+            <div class="stat">
+                <small>死亡回数</small>
+                <b>${player.totalDeaths}</b>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- ログ -->
+
+    <div class="card">
+
+        <div class="title">
+            📜 戦闘ログ
+        </div>
+
+        <div class="log">
+
+            ${
+                player.logs
+                .map(x=>`<div>${x}</div>`)
+                .join("")
+            }
+
+        </div>
+
+    </div>
+
+    <!-- セーブ -->
+
+    <div class="card">
+
+        <div class="grid2">
+
+            <button
+                onclick="save();log('💾 セーブしました！');render()">
+
+                💾 セーブ
+
+            </button>
+
+            <button
+                class="danger"
+                onclick="resetGame()">
+
+                🔄 最初から
+
+            </button>
+
+        </div>
+
+        <div class="small center" style="margin-top:8px">
+
+            データはこの端末のブラウザに自動保存されます。
+
+        </div>
+
+    </div>
+
+    `;
+
+}
+
+/* =========================================================
+   起動
+========================================================= */
+
+if(player.classId){
+
+    if(
+        player.maxHp<=0 ||
+        player.maxMp<=0
+    ){
+
+        const c=
+            CLASSES[player.classId];
+
+        player.maxHp=c.hp;
+        player.maxMp=c.mp;
+
+    }
+
+    if(player.shop.length===0){
+
+        refreshShop();
+    }
+
+}
+
+render();
+
 </script>
 
 </body>
